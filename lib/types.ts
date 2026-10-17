@@ -1,12 +1,20 @@
-/** Formato esperado de uma peça retornada pela API REST do backend. */
+/** Anunciante da peça, como retornado pela API. */
+export type Usuario = {
+  nome: string
+  /** Número no formato internacional, só dígitos (ex: "5511999999999"). */
+  whatsapp: string
+}
+
+/** Peça retornada por `GET {API_URL}/pecas`. */
 export type Peca = {
   id: string
   titulo: string
+  descricao: string
   /** Preço em reais. */
   preco: number
-  /** Etiqueta curta exibida no card (ex: "Tela", "Bateria"). */
+  /** Nome da categoria, igual ao exibido na vitrine (ex: "Telas"). */
   categoria: string
-  condicao: string
-  detalhe: string
   modeloCelular: string
+  imagemUrl: string | null
+  usuario: Usuario
 }
