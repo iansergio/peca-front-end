@@ -51,10 +51,6 @@ export const categorias: Categoria[] = [
   { slug: "telas", nome: "Telas", icone: Smartphone },
 ]
 
-// Ícone usado na área de imagem do card enquanto as peças não têm foto.
-export const iconePorEtiqueta: Record<string, LucideIcon | undefined> = {
-  Tela: Smartphone,
-  Bateria: BatteryFull,
-  Conector: PlugZap,
-  Celular: Smartphone,
-}
+// Ícone de fallback do card (sem foto), indexado pelo nome da categoria vindo da API.
+export const iconePorCategoria: Record<string, LucideIcon | undefined> =
+  Object.fromEntries(categorias.map((c) => [c.nome, c.icone]))
