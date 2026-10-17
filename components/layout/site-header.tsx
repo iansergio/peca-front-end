@@ -1,8 +1,9 @@
 import Link from "next/link"
 import { SearchIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
 export function SiteHeader() {
   return (
@@ -41,9 +42,12 @@ export function SiteHeader() {
           </Button>
         </form>
 
-        <Button type="button" className="ml-auto h-10 px-4 md:ml-0">
+        <Link
+          href="/anunciar"
+          className={cn(buttonVariants(), "ml-auto h-10 px-4 md:ml-0")}
+        >
           Anunciar peça
-        </Button>
+        </Link>
       </div>
     </header>
   )

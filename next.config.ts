@@ -4,6 +4,13 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    serverActions: {
+      // A foto passa pela Server Action antes de ir ao backend (limite de 5 MB
+      // lá); a folga cobre o overhead do multipart e os campos de texto.
+      bodySizeLimit: "6mb",
+    },
+  },
   images: {
     // Fotos das peças ficam no Storage do Supabase.
     remotePatterns: [{ protocol: "https", hostname: "**.supabase.co" }],
