@@ -1,5 +1,6 @@
 import { unstable_rethrow } from "next/navigation"
 
+import { ErroApi, detalheDoErro } from "@/lib/api/erros"
 import type { Peca } from "@/lib/types"
 
 export type DadosAnuncio = {
@@ -14,40 +15,11 @@ export type ResultadoAnuncio =
   | { ok: true; pecaId: string }
   /** A peça foi criada, mas o upload da foto falhou. */
   | { ok: "parcial"; pecaId: string; erro: string }
-  | { ok: false; erro: string }
-
-/** Erro de uma etapa da criação, já com mensagem pronta para o usuário. */
-class ErroApi extends Error {}
-
-/** Lê o `detail` do ProblemDetail do Spring, se houver. */
-async function detalheDoErro(res: Response) {
-  try {
-    const corpo = await res.json()
-    return typeof corpo?.detail === "string" ? corpo.detail : null
-  } catch {
-    return null
-  }
-}
-
-async function login(apiUrl: string, email: string, senha: string) {
-  const res = await fetch(`${apiUrl}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, senha }),
-    cache: "no-store",
-  })
-  if (res.status === 401 || res.status === 400) {
-    throw new ErroApi("Email ou senha inválidos.")
-  }
-  if (!res.ok) throw new ErroApi("Não foi possível entrar na sua conta agora.")
-
-  const { token } = (await res.json()) as { token: string }
-  return token
-}
+  /** `precisaLogin`: o token foi recusado pelo backend; é preciso entrar de novo. */
+  | { ok: false; erro: string; precisaLogin?: true }
 
 /**
- * Cria um anúncio no backend em três chamadas:
- * 0. `POST /auth/login` para obter o JWT (provisório até existir sessão/login).
+ * Cria um anúncio no backend em duas chamadas, ambas com o JWT da sessão:
  * 1. `POST /pecas` com os dados em JSON; o vendedor é o dono do token.
  * 2. `POST /pecas/{id}/imagem` com a foto em multipart (campo `arquivo`).
  *
@@ -55,7 +27,7 @@ async function login(apiUrl: string, email: string, senha: string) {
  * em vez de erro, para o usuário saber que o anúncio foi publicado.
  */
 export async function criarAnuncio(
-  credenciais: { email: string; senha: string },
+  token: string,
   dados: DadosAnuncio,
   foto: File
 ): Promise<ResultadoAnuncio> {
@@ -67,8 +39,6 @@ export async function criarAnuncio(
 
   let pecaId: string
   try {
-    const token = await login(apiUrl, credenciais.email, credenciais.senha)
-
     const res = await fetch(`${apiUrl}/pecas`, {
       method: "POST",
       headers: {
@@ -78,6 +48,10 @@ export async function criarAnuncio(
       body: JSON.stringify(dados),
       cache: "no-store",
     })
+    if (res.status === 401) {
+      console.warn("[criarAnuncio] POST /pecas recusou o token (HTTP 401)")
+      return { ok: false, erro: "Sua sessão expirou. Entre novamente.", precisaLogin: true }
+    }
     if (!res.ok) {
       const detalhe = await detalheDoErro(res)
       console.error(`[criarAnuncio] POST /pecas HTTP ${res.status}`, detalhe)

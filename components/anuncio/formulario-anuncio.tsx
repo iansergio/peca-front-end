@@ -35,7 +35,8 @@ export function FormularioAnuncio() {
 
     const foto = formData.get("foto")
     if (foto instanceof File && foto.size > TAMANHO_MAXIMO_FOTO) {
-      toast.error("A foto deve ter no máximo 5 MB.")
+      const mb = (foto.size / 1024 / 1024).toFixed(1).replace(".", ",")
+      toast.error("A foto deve ter no máximo 5 MB.", { description: `A foto escolhida tem ${mb} MB.` })
       return
     }
 
@@ -43,7 +44,13 @@ export function FormularioAnuncio() {
       const resultado = await publicarAnuncio(formData)
 
       if (resultado.ok === false) {
-        toast.error("Não foi possível publicar o anúncio", { description: resultado.erro })
+        toast.error("Não foi possível publicar o anúncio", {
+          description: resultado.erro,
+          // Os campos continuam preenchidos; a pessoa decide quando ir ao login.
+          action: resultado.precisaLogin
+            ? { label: "Entrar", onClick: () => router.push("/login?destino=/anunciar") }
+            : undefined,
+        })
         return
       }
 
@@ -119,33 +126,6 @@ export function FormularioAnuncio() {
             className="h-10 py-1.5"
           />
         </Campo>
-      </fieldset>
-
-      {/* Provisório: substitui o login até a Fase 2. As credenciais só são usadas
-          no servidor para obter o token e não ficam salvas no navegador. */}
-      <fieldset
-        disabled={enviando}
-        className="flex flex-col gap-5 rounded-xl border border-dashed bg-muted/50 p-4"
-      >
-        <legend className="px-1 text-sm font-semibold">Conta do vendedor (provisório)</legend>
-        <p className="-mt-2 text-xs text-muted-foreground">
-          Enquanto o login não fica pronto, informe a conta que vai publicar o anúncio.
-        </p>
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Campo id="email" label="Email">
-            <Input id="email" name="email" type="email" required autoComplete="email" className="h-10 bg-card" />
-          </Campo>
-          <Campo id="senha" label="Senha">
-            <Input
-              id="senha"
-              name="senha"
-              type="password"
-              required
-              autoComplete="current-password"
-              className="h-10 bg-card"
-            />
-          </Campo>
-        </div>
       </fieldset>
 
       <Button type="submit" disabled={enviando} className="h-11 w-full text-base sm:w-auto sm:self-end sm:px-8">
