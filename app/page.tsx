@@ -1,24 +1,29 @@
-import { Button } from "@/components/ui/button";
+import { CategoryGrid } from "@/components/vitrine/category-grid";
+import { CtaProcurando } from "@/components/vitrine/cta-procurando";
+import { HeroSection } from "@/components/vitrine/hero-section";
+import { PecaCard } from "@/components/vitrine/peca-card";
+import { pecasDestaque } from "@/lib/mocks/pecas";
 
-// Página provisória: a vitrine completa será implementada na Fase 3.
 export default function Home() {
   return (
-    <section className="rounded-2xl border bg-linear-to-br from-secondary to-card p-6 md:p-10">
-      <h1 className="text-3xl font-extrabold tracking-tight md:text-5xl">
-        Encontre a peça certa.
-        <br />
-        Venda o que está parado.
-      </h1>
-      <p className="mt-3 max-w-xl text-muted-foreground">
-        Um marketplace simples e direto para quem compra, vende ou procura peças
-        e celulares.
-      </p>
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Button className="h-10 px-4">Explorar peças</Button>
-        <Button variant="outline" className="h-10 px-4 text-primary">
-          Estou procurando
-        </Button>
-      </div>
-    </section>
+    <div className="flex flex-col gap-10">
+      <HeroSection />
+      <CategoryGrid />
+
+      <section id="destaques" aria-labelledby="destaques-titulo" className="scroll-mt-28">
+        <h2 id="destaques-titulo" className="mb-3 text-xl font-bold">
+          Destaques
+        </h2>
+        <ul className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+          {pecasDestaque.map((peca) => (
+            <li key={peca.id} className="flex">
+              <PecaCard peca={peca} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <CtaProcurando />
+    </div>
   );
 }
