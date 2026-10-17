@@ -1,6 +1,8 @@
 import Link from "next/link"
+import { Suspense } from "react"
 import { SearchIcon } from "lucide-react"
 
+import { MenuConta, MenuContaCarregando } from "@/components/layout/menu-conta"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -42,12 +44,14 @@ export function SiteHeader() {
           </Button>
         </form>
 
-        <Link
-          href="/anunciar"
-          className={cn(buttonVariants(), "ml-auto h-10 px-4 md:ml-0")}
-        >
-          Anunciar peça
-        </Link>
+        <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <Suspense fallback={<MenuContaCarregando />}>
+            <MenuConta />
+          </Suspense>
+          <Link href="/anunciar" className={cn(buttonVariants(), "h-10 px-4")}>
+            Anunciar peça
+          </Link>
+        </div>
       </div>
     </header>
   )
