@@ -1,5 +1,6 @@
 /** Anunciante da peça, como retornado pela API. */
-export type Usuario = {
+export type Vendedor = {
+  id: string
   nome: string
   /** Número no formato internacional, só dígitos (ex: "5511999999999"). */
   whatsapp: string
@@ -16,5 +17,5 @@ export type Peca = {
   categoria: string
   modeloCelular: string
   imagemUrl: string | null
-  usuario: Usuario
+  vendedor: Vendedor | null
 }
