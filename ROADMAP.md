@@ -15,11 +15,11 @@
 - [ ] Interface de Perfil do Usuário (com campo para número de WhatsApp).
 
 ## Fase 3: Vitrine e Fluxo de Venda
-- [-] Tela da Vitrine (Listagem de peças com grid responsivo).
-- [-] Componente de Card de Peça (Foto, Título, Preço e Modelo do Celular).
+- [x] Tela da Vitrine (Listagem de peças com grid responsivo).
+- [x] Componente de Card de Peça (Foto, Título, Preço e Modelo do Celular).
 - [ ] Tela de Detalhes da Peça.
 - [ ] Integração do botão "Comprar via WhatsApp" (gerando link dinâmico: `wa.me/NUMERO?text=MENSAGEM`).
 
 ## Fase 4: Integração com Backend
-- [ ] Conectar listagem de peças com a API REST.
+- [-] Conectar listagem de peças com a API REST.
 - [ ] Conectar criação de anúncio com a API REST e upload de fotos.
