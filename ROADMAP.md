@@ -6,9 +6,9 @@
 - [x] Testado pelo humano no navegador/celular e aprovado[cite: 2].
 
 ## Fase 1: Setup e Infraestrutura
-- [ ] Inicializar projeto Next.js 16 com Tailwind v4.
-- [ ] Configurar shadcn/ui e paleta de cores base do e-commerce.
-- [ ] Criar layout base (Header, Footer e container mobile).
+- [-] Inicializar projeto Next.js 16 com Tailwind v4.
+- [-] Configurar shadcn/ui e paleta de cores base do e-commerce.
+- [-] Criar layout base (Header, Footer e container mobile).
 
 ## Fase 2: Telas de Usuário (Mockadas)
 - [ ] Interface de Login / Cadastro.
