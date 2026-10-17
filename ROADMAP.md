@@ -22,4 +22,4 @@
 
 ## Fase 4: Integração com Backend
 - [-] Conectar listagem de peças com a API REST.
-- [ ] Conectar criação de anúncio com a API REST e upload de fotos.
+- [-] Conectar criação de anúncio com a API REST e upload de fotos.
