@@ -1,15 +1,18 @@
 import Image from "next/image"
-import { Smartphone } from "lucide-react"
+import { MessageCircle, Smartphone } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { iconePorCategoria } from "@/components/vitrine/categorias"
 import { formatarPreco } from "@/lib/format"
 import type { Peca } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import { gerarLinkWhatsapp } from "@/lib/whatsapp"
 
 export function PecaCard({ peca }: { peca: Peca }) {
   const Icone = iconePorCategoria[peca.categoria] ?? Smartphone
+  const linkWhatsapp = gerarLinkWhatsapp(peca)
 
   return (
     <Card className="w-full gap-3 pt-0 transition-all hover:-translate-y-0.5 hover:shadow-md">
@@ -38,10 +41,23 @@ export function PecaCard({ peca }: { peca: Peca }) {
         </p>
       </CardContent>
       <CardFooter className="border-t-0 bg-transparent">
-        {/* A ação de contato via WhatsApp será ligada em uma próxima tarefa. */}
-        <Button type="button" className="h-9 w-full">
-          Tenho interesse
-        </Button>
+        {linkWhatsapp ? (
+          <a
+            href={linkWhatsapp}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Tenho interesse em ${peca.titulo} (abre o WhatsApp em nova aba)`}
+            className={cn(buttonVariants(), "h-9 w-full")}
+          >
+            <MessageCircle aria-hidden />
+            Tenho interesse
+          </a>
+        ) : (
+          // Sem WhatsApp válido não há como contatar o vendedor.
+          <Button type="button" disabled className="h-9 w-full">
+            Contato indisponível
+          </Button>
+        )}
       </CardFooter>
     </Card>
   )
