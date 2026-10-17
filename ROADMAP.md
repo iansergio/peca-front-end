@@ -21,5 +21,5 @@
 - [ ] Integração do botão "Comprar via WhatsApp" (gerando link dinâmico: `wa.me/NUMERO?text=MENSAGEM`).
 
 ## Fase 4: Integração com Backend
-- [ ] Conectar listagem de peças com a API REST.
+- [-] Conectar listagem de peças com a API REST.
 - [ ] Conectar criação de anúncio com a API REST e upload de fotos.
