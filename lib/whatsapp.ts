@@ -25,10 +25,11 @@ export function normalizarWhatsapp(telefone: string | null | undefined) {
 
 /** Gera o link do WhatsApp com a mensagem de interesse, ou `null` se o vendedor não tiver número válido. */
 export function gerarLinkWhatsapp(peca: Peca) {
-  const numero = normalizarWhatsapp(peca.usuario?.whatsapp)
+  const numero = normalizarWhatsapp(peca.vendedor?.whatsapp)
   if (!numero) return null
 
-  const saudacao = peca.usuario.nome ? `Olá ${peca.usuario.nome}!` : "Olá!"
+  const nome = peca.vendedor?.nome
+  const saudacao = nome ? `Olá ${nome}!` : "Olá!"
   // Intl usa espaço não separável depois de "R$"; trocamos por um espaço comum.
   const preco = formatarPreco(peca.preco).replace(/\s/g, " ")
   const mensagem = `${saudacao} Tenho interesse na peça '${peca.titulo}' que está anunciada por ${preco} no PEÇA.`
