@@ -48,8 +48,9 @@ export function FormularioRegisto() {
           type="tel"
           inputMode="tel"
           autoComplete="tel-national"
-          // Aceita máscara; a action remove tudo o que não é dígito.
-          pattern="^[\d\s()+\-]{10,20}$"
+          // Aceita máscara; a action remove tudo o que não é dígito. O navegador
+          // compila o pattern com a flag `v`, que exige escapar ( ) + - na classe.
+          pattern="^[\d\s\(\)\+\-]{10,20}$"
           title="Informe o número com DDD (ex: (11) 99999-8888)"
           placeholder="(11) 99999-8888"
           className="h-10"
