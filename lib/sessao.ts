@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache"
 import { cookies } from "next/headers"
 
 import type { TokenResponse } from "@/lib/api/auth"
@@ -18,6 +19,27 @@ export async function lerSessao(): Promise<Sessao | null> {
   if (!payload) return null
 
   return { token, usuarioId: payload.sub, nome: payload.nome ?? "" }
+}
+
+/**
+ * Versão de `lerSessao` para a UI (header), com cache privado.
+ *
+ * Com Partial Prefetching, o Next pré-renderiza o App Shell lendo os cookies,
+ * mas o `Date.now()` da checagem de expiração é proibido nessa fase. O
+ * `"use cache: private"` resolve: o resultado fica só no navegador, por sessão.
+ * Login e logout (Server Actions que mudam o cookie) invalidam esse cache.
+ *
+ * Devolve só o nome para o token nunca entrar em cache. As Server Actions
+ * devem continuar usando `lerSessao`, que confere a expiração na hora.
+ */
+export async function lerUsuarioLogado(): Promise<{ nome: string } | null> {
+  "use cache: private"
+  // 5 min é o mínimo para o resultado entrar no App Shell. Efeito colateral:
+  // o header pode mostrar a pessoa logada até 5 min depois de o token expirar.
+  cacheLife({ stale: 300 })
+
+  const sessao = await lerSessao()
+  return sessao ? { nome: sessao.nome } : null
 }
 
 /** Grava o token. Só pode ser chamado em Server Actions ou Route Handlers. */

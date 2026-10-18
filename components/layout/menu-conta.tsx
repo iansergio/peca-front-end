@@ -1,4 +1,4 @@
-import { lerSessao } from "@/lib/sessao"
+import { lerUsuarioLogado } from "@/lib/sessao"
 
 import { MenuContaCliente } from "./menu-conta-cliente"
 
@@ -8,9 +8,9 @@ import { MenuContaCliente } from "./menu-conta-cliente"
  * no shell estático.
  */
 export async function MenuConta() {
-  const sessao = await lerSessao()
+  const usuario = await lerUsuarioLogado()
   // Só o nome vai para o cliente; o token nunca sai do servidor.
-  return <MenuContaCliente nome={sessao ? sessao.nome || "Minha conta" : null} />
+  return <MenuContaCliente nome={usuario ? usuario.nome || "Minha conta" : null} />
 }
 
 export function MenuContaCarregando() {
