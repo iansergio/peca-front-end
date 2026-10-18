@@ -10,8 +10,8 @@
 - [x] Configurar shadcn/ui e paleta de cores base do e-commerce.
 - [x] Criar layout base (Header, Footer e container mobile).
 
-## Fase 2: Telas de Usuário (Mockadas)
-- [-] Interface de Login / Cadastro (`/login` e `/registo`, com menu da conta e "Sair" no header).
+## Fase 2: Telas de Usuário
+- [x] Interface de Login / Cadastro (`/login` e `/registo`, com menu da conta e "Sair" no header).
 - [ ] Interface de Perfil do Usuário (com campo para número de WhatsApp).
 
 ## Fase 3: Vitrine e Fluxo de Venda
@@ -21,6 +21,6 @@
 - [x] Integração do botão "Comprar via WhatsApp" (gerando link dinâmico: `wa.me/NUMERO?text=MENSAGEM`).
 
 ## Fase 4: Integração com Backend
-- [-] Conectar listagem de peças com a API REST.
-- [-] Conectar criação de anúncio com a API REST e upload de fotos.
-- [-] Autenticação via API (`POST /auth/login` e `POST /usuarios`), JWT em cookie httpOnly enviado como `Bearer` na criação de anúncio.
+- [x] Conectar listagem de peças com a API REST.
+- [x] Conectar criação de anúncio com a API REST e upload de fotos.
+- [x] Autenticação via API (`POST /auth/login` e `POST /usuarios`), JWT em cookie httpOnly enviado como `Bearer` na criação de anúncio.
