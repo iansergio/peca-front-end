@@ -17,7 +17,7 @@ export function CategoryGrid() {
         {categorias.map(({ slug, nome, icone: Icone }) => (
           <li key={slug} className="snap-start">
             <Link
-              href={`/?categoria=${slug}`}
+              href={`/pecas?categoria=${slug}`}
               className="flex h-full min-h-24 flex-col items-center justify-center gap-2 rounded-xl border bg-card p-3 text-center text-xs font-semibold transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             >
               <Icone className="size-6 text-primary" aria-hidden />

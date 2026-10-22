@@ -22,9 +22,12 @@
 - [x] Componente de Card de Peça (Foto, Título, Preço e Modelo do Celular).
 - [ ] Tela de Detalhes da Peça.
 - [x] Integração do botão "Comprar via WhatsApp" (gerando link dinâmico: `wa.me/NUMERO?text=MENSAGEM`).
-- [ ] Refatoração da Landing Page: Hero Banner promocional.
-- [ ] Refatoração da Landing Page: Sub-header (segunda barra de navegação) de categorias.
-- [ ] Refatoração da Landing Page: Grid atualizado dos cards de peças conforme o novo mockup.
+- [-] Refatoração da Landing Page: Hero Banner promocional.
+- [-] Refatoração da Landing Page: Sub-header (segunda barra de navegação) de categorias.
+- [-] Refatoração da Landing Page: Grid atualizado dos cards de peças conforme o novo mockup.
+- [-] Header no padrão do DS (logo PEÇA, busca, "Explorar categorias", "Entrar" e "Anunciar peça").
+- [-] Página `/pecas` com busca e filtro por categoria (filtrados no frontend: a API só filtra por modelo/preço).
+- [ ] Selos de condição (Nova/Original/Retirada/Usada) com dados reais: o cartão já exibe, mas o backend ainda não tem o campo `condicao`.
 
 ## Fase 4: Integração com Backend
 - [x] Conectar listagem de peças com a API REST.

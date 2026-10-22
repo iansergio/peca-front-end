@@ -5,7 +5,8 @@ import { useTransition } from "react"
 import { LogOutIcon, UserIcon } from "lucide-react"
 
 import { sair } from "@/app/login/actions"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { classeLinkHeader } from "@/components/layout/estilos"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
 
 /** `nome === null` significa visitante (sem sessão válida). */
 export function MenuContaCliente({ nome }: { nome: string | null }) {
@@ -35,7 +35,12 @@ export function MenuContaCliente({ nome }: { nome: string | null }) {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="outline" size="icon" className="size-10 sm:hidden" aria-label="Minha conta" />
+            <Button
+              variant="outline"
+              size="icon"
+              className="border-white/70 bg-transparent text-white hover:bg-white/10 aria-expanded:bg-white/10 sm:hidden"
+              aria-label="Minha conta"
+            />
           }
         >
           <UserIcon />
@@ -64,23 +69,24 @@ export function MenuContaCliente({ nome }: { nome: string | null }) {
       <div className="hidden items-center gap-2 sm:flex">
         {nome ? (
           <>
-            <span className="max-w-32 truncate text-sm font-medium" title={nome}>
+            <span className="max-w-32 truncate text-sm font-semibold text-white" title={nome}>
               Olá, {primeiroNome}
             </span>
-            <Button variant="ghost" className="h-10 px-3" disabled={saindo} onClick={handleSair}>
+            <Button
+              variant="ghost"
+              className="px-3 text-white hover:bg-white/10 hover:text-white"
+              disabled={saindo}
+              onClick={handleSair}
+            >
               <LogOutIcon />
               Sair
             </Button>
           </>
         ) : (
-          <>
-            <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }), "h-10 px-3")}>
-              Entrar
-            </Link>
-            <Link href="/registo" className={cn(buttonVariants({ variant: "outline" }), "h-10 px-3")}>
-              Criar conta
-            </Link>
-          </>
+          // O DS mostra só "Entrar"; quem não tem conta acha "Criar conta" no login.
+          <Link href="/login" className={classeLinkHeader}>
+            Entrar
+          </Link>
         )}
       </div>
     </>
