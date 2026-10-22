@@ -1,5 +1,7 @@
 /** Cookie httpOnly com o JWT emitido pelo backend. */
 export const COOKIE_SESSAO = "peca_sessao"
+/** Cookie httpOnly com o nome a exibir no header (ver `salvarSessao`). */
+export const COOKIE_NOME = "peca_nome"
 
 export type PayloadJwt = {
   /** Id do usuário. */

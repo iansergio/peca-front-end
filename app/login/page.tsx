@@ -11,7 +11,7 @@ export default function LoginPage() {
   return (
     <PaginaAuth
       titulo="Entrar"
-      subtitulo="Acesse sua conta para anunciar peças."
+      subtitulo="Informe seu email e receba um código de acesso."
       pergunta="Ainda não tem conta?"
       linkAlternativo={{ href: "/registo", rotulo: "Criar conta" }}
     >

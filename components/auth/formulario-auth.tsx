@@ -9,16 +9,21 @@ import { Button } from "@/components/ui/button"
 import { FieldError, FieldGroup } from "@/components/ui/field"
 
 /**
- * Casca comum de login e registo: envia para a Server Action e mostra o erro
- * devolvido. No sucesso a action redireciona, então não há estado de "ok".
+ * Casca comum das etapas de login e registo: envia para a Server Action e
+ * mostra o erro devolvido. Na confirmação do código a action redireciona; no
+ * envio do código ela devolve `ok: true` e o `aoConcluir` avança de etapa.
  */
 export function FormularioAuth({
   acao,
+  aoConcluir,
+  aoFalhar,
   rotuloEnviar,
   rotuloEnviando,
   children,
 }: {
   acao: (formData: FormData) => Promise<ResultadoAuth>
+  aoConcluir?: (formData: FormData) => void
+  aoFalhar?: () => void
   rotuloEnviar: string
   rotuloEnviando: string
   children: ReactNode
@@ -34,7 +39,13 @@ export function FormularioAuth({
     setErro(null)
     startTransition(async () => {
       const resultado = await acao(formData)
-      if (resultado) setErro(resultado.erro)
+      // Sem resultado = a action redirecionou.
+      if (!resultado) return
+      if (resultado.ok) aoConcluir?.(formData)
+      else {
+        setErro(resultado.erro)
+        aoFalhar?.()
+      }
     })
   }
 
