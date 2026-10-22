@@ -28,6 +28,9 @@
 5. Atualize o `ROADMAP.md` seguindo a regra de honestidade[cite: 2].
 6. Abra o Pull Request via GitHub CLI (`gh`) usando o template `.github/pull_request_template.md`[cite: 2].
 
+## DESIGN SYSTEM STRICT MODE
+1. Para qualquer estilização, componente ou cor, você DEVE consultar e seguir estritamente as regras definidas nA pasta docs/. Nunca invente cores fora da paleta oficial. Atualize o app/globals.css com variáveis CSS equivalentes ao Design System se for necessário para integrar com o shadcn."
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
