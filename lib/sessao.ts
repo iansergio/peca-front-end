@@ -2,7 +2,7 @@ import { cacheLife } from "next/cache"
 import { cookies } from "next/headers"
 
 import type { TokenResponse } from "@/lib/api/auth"
-import { COOKIE_SESSAO, lerPayloadJwt } from "@/lib/jwt"
+import { COOKIE_NOME, COOKIE_SESSAO, lerPayloadJwt } from "@/lib/jwt"
 
 export type Sessao = {
   token: string
@@ -12,13 +12,17 @@ export type Sessao = {
 
 /** Sessão atual, ou `null` se não há cookie ou o token está malformado/expirado. */
 export async function lerSessao(): Promise<Sessao | null> {
-  const token = (await cookies()).get(COOKIE_SESSAO)?.value
+  const cookieStore = await cookies()
+  const token = cookieStore.get(COOKIE_SESSAO)?.value
   if (!token) return null
 
   const payload = lerPayloadJwt(token)
   if (!payload) return null
 
-  return { token, usuarioId: payload.sub, nome: payload.nome ?? "" }
+  // O cookie de nome vence o claim do JWT: no registo o perfil é atualizado
+  // depois de o token ser emitido, então o claim ainda traz o nome provisório.
+  const nome = cookieStore.get(COOKIE_NOME)?.value || payload.nome || ""
+  return { token, usuarioId: payload.sub, nome }
 }
 
 /**
@@ -42,22 +46,29 @@ export async function lerUsuarioLogado(): Promise<{ nome: string } | null> {
   return sessao ? { nome: sessao.nome } : null
 }
 
-/** Grava o token. Só pode ser chamado em Server Actions ou Route Handlers. */
-export async function salvarSessao({ token, expiraEm }: TokenResponse) {
+/**
+ * Grava o token e o nome a exibir. Só pode ser chamado em Server Actions ou
+ * Route Handlers. `nome` sobrescreve o nome que veio no login (ex: o que a
+ * pessoa digitou no registo).
+ */
+export async function salvarSessao({ token, expiraEm, usuario }: TokenResponse, nome = usuario.nome) {
   const cookieStore = await cookies()
-  cookieStore.set(COOKIE_SESSAO, token, {
+  const opcoes = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    // O cookie expira junto com o token, para não sobrar sessão inválida.
+    // Os cookies expiram junto com o token, para não sobrar sessão inválida.
     expires: new Date(expiraEm),
-  })
+  } as const
+  cookieStore.set(COOKIE_SESSAO, token, opcoes)
+  cookieStore.set(COOKIE_NOME, nome, opcoes)
 }
 
 export async function encerrarSessao() {
   const cookieStore = await cookies()
   cookieStore.delete(COOKIE_SESSAO)
+  cookieStore.delete(COOKIE_NOME)
 }
 
 /**

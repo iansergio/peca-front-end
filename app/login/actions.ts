@@ -2,24 +2,51 @@
 
 import { redirect } from "next/navigation"
 
-import { login } from "@/lib/api/auth"
+import { solicitarCodigo, verificarCodigo } from "@/lib/api/auth"
 import { ErroApi } from "@/lib/api/erros"
 import { destinoSeguro, encerrarSessao, salvarSessao } from "@/lib/sessao"
 
-export type ResultadoAuth = { erro: string }
+/** `ok: true` só aparece no envio do código; a confirmação redireciona no sucesso. */
+export type ResultadoAuth = { ok: true } | { ok: false; erro: string }
 
-/** Em caso de sucesso redireciona (e não retorna); em caso de falha devolve o erro. */
-export async function entrar(formData: FormData): Promise<ResultadoAuth> {
-  const email = String(formData.get("email") ?? "").trim()
-  const senha = String(formData.get("senha") ?? "")
-  if (!email || !senha) return { erro: "Informe email e senha." }
+/** Mesmas regras de `VerificarCodigoRequest` do backend. */
+const CODIGO_OTP = /^\d{6}$/
+
+function texto(formData: FormData, campo: string) {
+  const valor = formData.get(campo)
+  return typeof valor === "string" ? valor.trim() : ""
+}
+
+function erroDeConexao(origem: string, erro: unknown): ResultadoAuth {
+  if (erro instanceof ErroApi) return { ok: false, erro: erro.message }
+  console.error(`[${origem}] falha ao conectar no backend`, erro)
+  return { ok: false, erro: "Não foi possível conectar ao servidor. Tente novamente." }
+}
+
+/** Etapa 1 do login (e reenvio): manda o código para o email. */
+export async function enviarCodigo(formData: FormData): Promise<ResultadoAuth> {
+  const email = texto(formData, "email")
+  if (!email) return { ok: false, erro: "Informe o seu email." }
 
   try {
-    await salvarSessao(await login(email, senha))
+    await solicitarCodigo(email)
+    return { ok: true }
   } catch (erro) {
-    if (erro instanceof ErroApi) return { erro: erro.message }
-    console.error("[entrar] falha ao conectar no backend", erro)
-    return { erro: "Não foi possível conectar ao servidor. Tente novamente." }
+    return erroDeConexao("enviarCodigo", erro)
+  }
+}
+
+/** Etapa 2: valida o código, grava o JWT no cookie httpOnly e redireciona. */
+export async function confirmarCodigo(formData: FormData): Promise<ResultadoAuth> {
+  const email = texto(formData, "email")
+  const codigo = texto(formData, "codigo")
+  if (!email) return { ok: false, erro: "Informe o seu email." }
+  if (!CODIGO_OTP.test(codigo)) return { ok: false, erro: "Digite os 6 dígitos do código." }
+
+  try {
+    await salvarSessao(await verificarCodigo(email, codigo))
+  } catch (erro) {
+    return erroDeConexao("confirmarCodigo", erro)
   }
 
   // Fora do try: `redirect` funciona lançando uma exceção.

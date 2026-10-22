@@ -11,7 +11,7 @@ export default function RegistoPage() {
   return (
     <PaginaAuth
       titulo="Criar conta"
-      subtitulo="Cadastre-se para vender suas peças na vitrine."
+      subtitulo="Cadastre-se para vender suas peças. Você confirma o email com um código, sem senha."
       pergunta="Já tem conta?"
       linkAlternativo={{ href: "/login", rotulo: "Entrar" }}
     >
