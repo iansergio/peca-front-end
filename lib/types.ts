@@ -6,6 +6,8 @@ export type Vendedor = {
   whatsapp: string
 }
 
+export type Condicao = "Nova" | "Original" | "Retirada" | "Usada"
+
 /** Peça retornada por `GET {API_URL}/pecas`. */
 export type Peca = {
   id: string
@@ -16,6 +18,11 @@ export type Peca = {
   /** Nome da categoria, igual ao exibido na vitrine (ex: "Telas"). */
   categoria: string
   modeloCelular: string
+  /**
+   * Selo de condição do DS. Ainda não existe no backend: fica opcional e o
+   * cartão só mostra o selo quando a API mandar o campo.
+   */
+  condicao?: Condicao | null
   imagemUrl: string | null
   vendedor: Vendedor | null
 }

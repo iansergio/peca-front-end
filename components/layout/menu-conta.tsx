@@ -14,5 +14,5 @@ export async function MenuConta() {
 }
 
 export function MenuContaCarregando() {
-  return <div className="h-10 w-10 animate-pulse rounded-lg bg-muted sm:w-40" aria-hidden />
+  return <div className="size-11 animate-pulse rounded-md bg-white/15 sm:w-32" aria-hidden />
 }
