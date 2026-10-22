@@ -12,6 +12,13 @@
 3. Não crie componentes de UI do zero se o `shadcn/ui` possuir um equivalente. Use a CLI do shadcn para adicionar os componentes necessários.
 4. O frontend não se conecta diretamente ao banco de dados. Ele deve apenas consumir as APIs REST fornecidas pelo backend via `fetch` ou Server Actions.
 5. Em integrações simuladas ou em desenvolvimento, utilize dados mockados no formato JSON esperado da API.
+6. A autenticação é Passwordless via OTP por email, em duas etapas: (1) o usuário informa o email e recebe o código; (2) o usuário informa o código OTP recebido. Não existem telas de senha nem de cadastro com senha.
+7. O JWT retornado pelo backend após a validação do OTP é guardado num cookie `httpOnly` (nunca em `localStorage`/`sessionStorage`) e enviado ao backend como `Authorization: Bearer` a partir do servidor.
+
+## Regras de Design (Conversão de E-commerce)
+1. Exiba elementos de confiança: selos de compra segura, avaliações/reputação do vendedor, política de garantia/devolução e meios de contato visíveis.
+2. Botões de ação (CTA) devem ser claros e inequívocos: um CTA primário por tela, texto orientado à ação (ex: "Comprar via WhatsApp"), alto contraste e área de toque mínima de 44×44px.
+3. Todo elemento interativo deve dar feedback tátil/visual imediato: estados de `hover`, `active` (ex: leve redução de escala), `focus-visible`, `disabled` e de carregamento (spinner/skeleton) em ações assíncronas.
 
 ## Fluxo de Trabalho (Obrigatório)
 1. Crie uma branch para cada tarefa (ex: `feat/vitrine-pecas`, `fix/botao-whatsapp`).

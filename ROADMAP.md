@@ -11,7 +11,9 @@
 - [x] Criar layout base (Header, Footer e container mobile).
 
 ## Fase 2: Telas de Usuário
-- [x] Interface de Login / Cadastro (`/login` e `/registo`, com menu da conta e "Sair" no header).
+- [ ] Tela de Login OTP — Etapa 1: inserir email e solicitar envio do código.
+- [ ] Tela de Login OTP — Etapa 2: inserir o código OTP recebido por email (com reenvio do código).
+- [ ] Menu da conta e "Sair" no header adaptados ao fluxo OTP.
 - [ ] Interface de Perfil do Usuário (com campo para número de WhatsApp).
 
 ## Fase 3: Vitrine e Fluxo de Venda
@@ -19,8 +21,11 @@
 - [x] Componente de Card de Peça (Foto, Título, Preço e Modelo do Celular).
 - [ ] Tela de Detalhes da Peça.
 - [x] Integração do botão "Comprar via WhatsApp" (gerando link dinâmico: `wa.me/NUMERO?text=MENSAGEM`).
+- [ ] Refatoração da Landing Page: Hero Banner promocional.
+- [ ] Refatoração da Landing Page: Sub-header (segunda barra de navegação) de categorias.
+- [ ] Refatoração da Landing Page: Grid atualizado dos cards de peças conforme o novo mockup.
 
 ## Fase 4: Integração com Backend
 - [x] Conectar listagem de peças com a API REST.
 - [x] Conectar criação de anúncio com a API REST e upload de fotos.
-- [x] Autenticação via API (`POST /auth/login` e `POST /usuarios`), JWT em cookie httpOnly enviado como `Bearer` na criação de anúncio.
+- [ ] Autenticação Passwordless OTP via API (solicitar código por email e validar código), JWT em cookie httpOnly enviado como `Bearer` na criação de anúncio.
