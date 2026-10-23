@@ -1,6 +1,7 @@
-import { ErroApi, detalheDoErro } from "@/lib/api/erros"
+import { requisicaoApi } from "@/lib/api/cliente"
+import { ErroApi, ErroLimite, detalheDoErro, formatarEspera, segundosDeEspera } from "@/lib/api/erros"
 
-/** Perfil resumido devolvido pela API (`UsuarioResponse`). */
+/** Perfil devolvido pela API (`UsuarioResponse`). */
 export type Usuario = {
   id: string
   nome: string
@@ -18,83 +19,62 @@ export type TokenResponse = {
   usuario: Usuario
 }
 
-export type DadosPerfil = {
-  nome: string
-  email: string
-  /** Só dígitos, com DDD. */
-  whatsapp: string
-}
-
-function apiUrl() {
-  const url = process.env.API_URL
-  if (!url) {
-    console.error("[auth] variável de ambiente API_URL não definida")
-    throw new ErroApi("O serviço de contas não está configurado.")
-  }
-  return url
-}
-
 /**
- * Etapa 1 do login OTP: pede ao backend que envie um código de 6 dígitos para
- * o email. Se o email ainda não tem conta, o backend cria uma na hora (com um
- * nome provisório tirado do email), por isso não existe "email não encontrado".
+ * Etapa 1 do OTP: pede ao backend que envie um código de 6 dígitos para o email.
+ *
+ * - Cadastro: manda `nome`. A conta só é criada quando o código for verificado;
+ *   se o email já tiver conta, o nome dela não é alterado.
+ * - Login: não manda `nome`. A resposta é a mesma exista a conta ou não, para
+ *   não revelar quais emails estão cadastrados.
+ *
+ * `ipVisitante` vai em `X-Forwarded-For`: como o front chama o backend pelo
+ * servidor, sem ele todo mundo chegaria ao limite por IP com o IP do front.
+ *
+ * Lança `ErroLimite` no HTTP 429 (cooldown de 60 s ou limites por hora).
  */
-export async function solicitarCodigo(email: string) {
-  const res = await fetch(`${apiUrl()}/auth/solicitar-codigo`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
-    cache: "no-store",
+export async function solicitarCodigo(email: string, nome?: string, ipVisitante?: string | null) {
+  const res = await requisicaoApi("/auth/solicitar-codigo", {
+    metodo: "POST",
+    json: nome ? { nome, email } : { email },
+    headers: ipVisitante ? { "X-Forwarded-For": ipVisitante } : undefined,
   })
+  if (res.ok) return
+
+  if (res.status === 429) {
+    const segundos = segundosDeEspera(res)
+    console.warn(`[auth] solicitar-codigo limitado (HTTP 429, ${segundos}s)`)
+    throw new ErroLimite(`Muitos pedidos de código. Tente de novo em ${formatarEspera(segundos)}.`, segundos)
+  }
+
+  const detalhe = await detalheDoErro(res)
   if (res.status === 400) {
-    console.warn("[auth] solicitar-codigo recusado (HTTP 400)", await detalheDoErro(res))
-    throw new ErroApi("Informe um email válido.")
+    // Login sem nome para um email sem conta: o backend atual responde 400 por
+    // falta de `nome`. Tratamos como sucesso para não revelar que o email não
+    // existe. Quando o backend tornar `nome` opcional (ajuste pendente no
+    // peca-backend, descrito no PR deste front), ele já responde 200 nesse caso.
+    if (!nome && detalhe && /\bnome\b/i.test(detalhe) && !/\bemail\b/i.test(detalhe)) {
+      console.info("[auth] solicitar-codigo sem nome recusado (HTTP 400): tratado como envio neutro")
+      return
+    }
+    console.warn("[auth] solicitar-codigo recusado (HTTP 400)", detalhe)
+    throw new ErroApi("Informe um email válido.", 400)
   }
-  if (!res.ok) {
-    console.error(`[auth] solicitar-codigo HTTP ${res.status}`, await detalheDoErro(res))
-    throw new ErroApi("Não foi possível enviar o código agora.")
-  }
+
+  console.error(`[auth] solicitar-codigo HTTP ${res.status}`, detalhe)
+  throw new ErroApi("Não foi possível enviar o código agora.", res.status)
 }
 
 /** Etapa 2: troca email + código por um JWT. Lança `ErroApi` com mensagem para o usuário. */
 export async function verificarCodigo(email: string, codigo: string): Promise<TokenResponse> {
-  const res = await fetch(`${apiUrl()}/auth/verificar-codigo`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, codigo }),
-    cache: "no-store",
-  })
+  const res = await requisicaoApi("/auth/verificar-codigo", { metodo: "POST", json: { email, codigo } })
   if (res.status === 401 || res.status === 400) {
     // 401 cobre código errado, expirado, já usado ou bloqueado após 5 tentativas.
     console.warn(`[auth] código recusado (HTTP ${res.status})`, await detalheDoErro(res))
-    throw new ErroApi("Código inválido ou expirado. Confira o email ou peça um novo código.")
+    throw new ErroApi("Código inválido ou expirado. Confira o email ou peça um novo código.", res.status)
   }
   if (!res.ok) {
     console.error(`[auth] verificar-codigo HTTP ${res.status}`, await detalheDoErro(res))
-    throw new ErroApi("Não foi possível entrar na sua conta agora.")
+    throw new ErroApi("Não foi possível entrar na sua conta agora.", res.status)
   }
   return (await res.json()) as TokenResponse
-}
-
-/** Atualiza o perfil do próprio usuário em `PUT /usuarios/{id}`. */
-export async function atualizarPerfil(token: string, id: string, dados: DadosPerfil): Promise<Usuario> {
-  const res = await fetch(`${apiUrl()}/usuarios/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(dados),
-    cache: "no-store",
-  })
-  if (!res.ok) {
-    const detalhe = await detalheDoErro(res)
-    console.error(`[auth] atualizar perfil HTTP ${res.status}`, detalhe)
-    throw new ErroApi(
-      res.status === 400 && detalhe
-        ? `Verifique os seus dados (${detalhe}).`
-        : "Não foi possível salvar os seus dados agora."
-    )
-  }
-  return (await res.json()) as Usuario
 }

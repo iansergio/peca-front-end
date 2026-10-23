@@ -1,5 +1,6 @@
 import { unstable_rethrow } from "next/navigation"
 
+import { requisicaoApi } from "@/lib/api/cliente"
 import type { Peca } from "@/lib/types"
 
 export type ResultadoPecas =
@@ -14,19 +15,14 @@ export type ResultadoPecas =
  * para que a página mostre uma mensagem amigável em vez de quebrar.
  */
 export async function listarPecas(): Promise<ResultadoPecas> {
-  const apiUrl = process.env.API_URL
-  if (!apiUrl) {
+  if (!process.env.API_URL) {
     console.error("[listarPecas] variável de ambiente API_URL não definida")
     return { ok: false, erro: "configuracao" }
   }
 
   try {
-    const res = await fetch(`${apiUrl}/pecas`, {
-      // A vitrine deve refletir sempre o estado atual dos anúncios.
-      cache: "no-store",
-      // Evita que um backend travado segure a renderização indefinidamente.
-      signal: AbortSignal.timeout(8000),
-    })
+    // Timeout menor que o padrão: a vitrine prefere mostrar o aviso a ficar esperando.
+    const res = await requisicaoApi("/pecas", { timeoutMs: 8000 })
 
     if (!res.ok) {
       console.error(`[listarPecas] HTTP ${res.status} em ${res.url}`)

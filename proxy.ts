@@ -3,13 +3,13 @@ import { NextResponse, type NextRequest } from "next/server"
 import { COOKIE_SESSAO, lerPayloadJwt } from "@/lib/jwt"
 
 /** Rotas que exigem login. */
-const ROTAS_PROTEGIDAS = ["/anunciar"]
+const ROTAS_PROTEGIDAS = ["/anunciar", "/perfil"]
 /** Rotas que não fazem sentido para quem já está logado. */
 const ROTAS_VISITANTE = ["/login", "/registo"]
 
 /**
  * Checagem otimista (só olha o cookie, sem chamar o backend): evita renderizar
- * /anunciar para quem não está logado. A Server Action de publicação confere a
+ * /anunciar e /perfil para quem não está logado. As Server Actions conferem a
  * sessão de novo, e o backend valida o token de verdade.
  */
 export function proxy(request: NextRequest) {
@@ -30,5 +30,5 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Precisa ser literal (o Next lê em tempo de build): manter igual às listas acima.
-  matcher: ["/anunciar", "/login", "/registo"],
+  matcher: ["/anunciar", "/perfil", "/login", "/registo"],
 }
