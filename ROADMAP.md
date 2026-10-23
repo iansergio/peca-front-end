@@ -35,3 +35,9 @@
 - [-] Autenticação Passwordless OTP via API (solicitar código por email e validar código), JWT em cookie httpOnly enviado como `Bearer` na criação de anúncio.
 - [-] Integração v2 com o backend: cliente HTTP único (`lib/api/cliente.ts`), `nome` só no cadastro, login com resposta neutra, limite de pedidos (429 + Retry-After) com reenvio travado, `GET /usuarios/me`, `PUT /usuarios/{id}` sem email e `whatsapp` obrigatório ao anunciar (pré-preenchido do perfil).
 - [ ] Login de email sem conta respondido pelo backend sem erro (hoje o backend exige `nome` e responde 400; o front trata como envio neutro até o ajuste no `peca-backend`).
+
+## Fase 5: Deploy
+- [-] Workflow do GitHub Actions para o Azure App Service (build `standalone`, pacote só com `.next/standalone`, Node 24, deploy por OIDC na `main`).
+- [-] Rota de health check `/api/saude` (dinâmica, sem depender do backend).
+- [-] Documentação do deploy (`docs/deploy-azure.md`: App Settings, startup `node server.js`, HTTPS, Always On, health check, rede e rollback) e README em português.
+- [ ] Validar o deploy no App Service real com o backend em produção.
