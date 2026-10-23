@@ -9,7 +9,7 @@ O front roda no Container App **`peca-web`**, no mesmo ambiente do backend (`pec
 
 O workflow [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) tem dois jobs:
 
-1. **`verificacao`** (todo PR para a `main` e todo push): `npm ci`, `npm run lint`, `npx tsc --noEmit` e `npm run build`.
+1. **`verificacao`** (todo PR para a `main` e todo push): `npm ci`, `npm run lint` e `npm run build` (o build também checa os tipos).
 2. **`deploy`** (só em push na `main` ou disparo manual a partir da `main`):
    1. build da imagem;
    2. push para `ghcr.io/iansergio/peca-front-end:<sha>` e `:latest`;

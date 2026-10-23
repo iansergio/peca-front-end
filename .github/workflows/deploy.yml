@@ -27,7 +27,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npx tsc --noEmit
+      # O build também checa os tipos (inclui os PageProps/LayoutProps que ele gera).
       - run: npm run build
 
   deploy:
