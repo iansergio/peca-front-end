@@ -3,10 +3,10 @@
 import { Suspense, useState, useTransition, type FormEvent, type ReactNode } from "react"
 import { Loader2 } from "lucide-react"
 
-import type { ResultadoAuth } from "@/app/login/actions"
 import { CampoDestino } from "@/components/auth/campo-destino"
 import { Button } from "@/components/ui/button"
 import { FieldError, FieldGroup } from "@/components/ui/field"
+import type { ResultadoAuth } from "@/lib/resultado-auth"
 
 /**
  * Casca comum das etapas de login e registo: envia para a Server Action e

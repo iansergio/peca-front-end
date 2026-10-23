@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 
 export function FormularioLogin() {
   return (
-    <FluxoOtp acaoEnviar={enviarCodigo} acaoConfirmar={confirmarCodigo} rotuloEnviar="Continuar">
+    <FluxoOtp acaoEnviar={enviarCodigo} acaoConfirmar={confirmarCodigo} rotuloEnviar="Continuar" envioNeutro>
       <Field>
         <FieldLabel htmlFor="email">Email</FieldLabel>
         <Input
@@ -20,7 +20,9 @@ export function FormularioLogin() {
           placeholder="voce@email.com"
           className="h-11"
         />
-        <FieldDescription>Vamos enviar um código de acesso. Sem senha para decorar.</FieldDescription>
+        <FieldDescription>
+          Se existir uma conta com esse e-mail, enviaremos um código. Sem senha para decorar.
+        </FieldDescription>
       </Field>
     </FluxoOtp>
   )

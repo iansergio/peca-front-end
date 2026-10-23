@@ -19,8 +19,8 @@ export async function lerSessao(): Promise<Sessao | null> {
   const payload = lerPayloadJwt(token)
   if (!payload) return null
 
-  // O cookie de nome vence o claim do JWT: no registo o perfil é atualizado
-  // depois de o token ser emitido, então o claim ainda traz o nome provisório.
+  // O cookie de nome vence o claim do JWT: o claim é o nome do momento do
+  // login e fica desatualizado quando a pessoa edita o perfil.
   const nome = cookieStore.get(COOKIE_NOME)?.value || payload.nome || ""
   return { token, usuarioId: payload.sub, nome }
 }
@@ -53,16 +53,31 @@ export async function lerUsuarioLogado(): Promise<{ nome: string } | null> {
  */
 export async function salvarSessao({ token, expiraEm, usuario }: TokenResponse, nome = usuario.nome) {
   const cookieStore = await cookies()
-  const opcoes = {
+  const opcoes = opcoesCookie(new Date(expiraEm))
+  cookieStore.set(COOKIE_SESSAO, token, opcoes)
+  cookieStore.set(COOKIE_NOME, nome, opcoes)
+}
+
+/**
+ * Troca o nome exibido no header depois de editar o perfil, mantendo a
+ * expiração do token atual. Só em Server Actions ou Route Handlers.
+ */
+export async function atualizarNomeSessao(sessao: Sessao, nome: string) {
+  const payload = lerPayloadJwt(sessao.token)
+  if (!payload) return
+  const cookieStore = await cookies()
+  cookieStore.set(COOKIE_NOME, nome, opcoesCookie(new Date(payload.exp * 1000)))
+}
+
+function opcoesCookie(expires: Date) {
+  return {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     // Os cookies expiram junto com o token, para não sobrar sessão inválida.
-    expires: new Date(expiraEm),
+    expires,
   } as const
-  cookieStore.set(COOKIE_SESSAO, token, opcoes)
-  cookieStore.set(COOKIE_NOME, nome, opcoes)
 }
 
 export async function encerrarSessao() {

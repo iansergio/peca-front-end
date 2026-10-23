@@ -2,6 +2,7 @@
 
 import { categorias } from "@/components/vitrine/categorias"
 import { criarAnuncio, type ResultadoAnuncio } from "@/lib/api/anuncios"
+import { WHATSAPP_VALIDO, soDigitos } from "@/lib/api/perfil"
 import { TAMANHO_MAXIMO_FOTO, TIPOS_FOTO_ACEITOS } from "@/lib/regras-anuncio"
 import { encerrarSessao, lerSessao } from "@/lib/sessao"
 
@@ -22,6 +23,8 @@ export async function publicarAnuncio(formData: FormData): Promise<ResultadoAnun
   const descricao = texto(formData, "descricao")
   const categoria = texto(formData, "categoria")
   const modeloCelular = texto(formData, "modeloCelular")
+  // Aceita "(11) 99999-8888": a API quer só dígitos.
+  const whatsapp = soDigitos(formData.get("whatsapp"))
   // Aceita "1.234,56" e "1234.56": remove separador de milhar e usa ponto decimal.
   const precoTexto = texto(formData, "preco")
   const preco = Number(
@@ -44,6 +47,7 @@ export async function publicarAnuncio(formData: FormData): Promise<ResultadoAnun
     if (!titulo || !modeloCelular) return "Preencha título e modelo do celular."
     if (!categoriasValidas.has(categoria)) return "Escolha uma categoria."
     if (!Number.isFinite(preco) || preco < 0.01) return "Informe um preço válido."
+    if (!WHATSAPP_VALIDO.test(whatsapp)) return "Informe o WhatsApp com DDD (10 a 13 dígitos)."
     if (!(foto instanceof File) || foto.size === 0) return "Escolha uma foto da peça."
     if (!TIPOS_FOTO_ACEITOS.includes(foto.type)) return "A foto deve ser JPG, PNG ou WebP."
     if (foto.size > TAMANHO_MAXIMO_FOTO) return "A foto deve ter no máximo 5 MB."
@@ -52,7 +56,7 @@ export async function publicarAnuncio(formData: FormData): Promise<ResultadoAnun
 
   const resultado = await criarAnuncio(
     sessao.token,
-    { titulo, descricao, preco: Math.round(preco * 100) / 100, categoria, modeloCelular },
+    { titulo, descricao, preco: Math.round(preco * 100) / 100, categoria, modeloCelular, whatsapp },
     foto as File
   )
   // Token recusado pelo backend: apaga o cookie para o header não mostrar

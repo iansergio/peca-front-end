@@ -1,18 +1,23 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition, type ReactNode } from "react"
+import Link from "next/link"
+import { Suspense, useEffect, useRef, useState, useTransition, type ReactNode } from "react"
 import { REGEXP_ONLY_DIGITS } from "input-otp"
 import { Loader2, MailCheckIcon } from "lucide-react"
 import { toast } from "sonner"
 
-import type { ResultadoAuth } from "@/app/login/actions"
+import { LinkComDestino } from "@/components/auth/campo-destino"
 import { FormularioAuth } from "@/components/auth/formulario-auth"
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
+import type { ResultadoAuth } from "@/lib/resultado-auth"
 
-/** Espera entre reenvios, para a pessoa não disparar vários emails seguidos. */
-const ESPERA_REENVIO_S = 30
+/**
+ * Espera entre reenvios. Igual ao cooldown do backend por email (60 s): antes
+ * disso o backend responderia 429 de qualquer jeito.
+ */
+const ESPERA_REENVIO_S = 60
 
 type Acao = (formData: FormData) => Promise<ResultadoAuth>
 
@@ -25,16 +30,21 @@ type Acao = (formData: FormData) => Promise<ResultadoAuth>
  *
  * Os campos da etapa 1 seguem como `hidden` na etapa 2, porque o registo
  * precisa de nome e WhatsApp de novo para salvar o perfil depois do login.
+ *
+ * `envioNeutro` (login): os textos não afirmam que o código foi enviado, porque
+ * a resposta do backend é a mesma exista ou não uma conta com o email.
  */
 export function FluxoOtp({
   acaoEnviar,
   acaoConfirmar,
   rotuloEnviar,
+  envioNeutro = false,
   children,
 }: {
   acaoEnviar: Acao
   acaoConfirmar: Acao
   rotuloEnviar: string
+  envioNeutro?: boolean
   children: ReactNode
 }) {
   const [dados, setDados] = useState<[string, string][] | null>(null)
@@ -64,6 +74,7 @@ export function FluxoOtp({
       dados={dados}
       acaoEnviar={acaoEnviar}
       acaoConfirmar={acaoConfirmar}
+      envioNeutro={envioNeutro}
       aoTrocarEmail={() => setDados(null)}
     />
   )
@@ -73,11 +84,13 @@ function EtapaCodigo({
   dados,
   acaoEnviar,
   acaoConfirmar,
+  envioNeutro,
   aoTrocarEmail,
 }: {
   dados: [string, string][]
   acaoEnviar: Acao
   acaoConfirmar: Acao
+  envioNeutro: boolean
   aoTrocarEmail: () => void
 }) {
   const email = dados.find(([campo]) => campo === "email")?.[1] ?? ""
@@ -93,15 +106,20 @@ function EtapaCodigo({
   }, [espera])
 
   function handleReenviar() {
+    // Reenvia todos os campos da etapa 1: o registo valida nome e WhatsApp de novo.
     const formData = new FormData()
-    formData.set("email", email)
+    for (const [campo, valor] of dados) formData.set(campo, valor)
     startReenvio(async () => {
       const resultado = await acaoEnviar(formData)
       if (resultado.ok) {
-        toast.success("Enviamos um novo código", { description: email })
+        toast.success(envioNeutro ? "Se existir uma conta, enviamos um novo código" : "Enviamos um novo código", {
+          description: email,
+        })
         setEspera(ESPERA_REENVIO_S)
       } else {
         toast.error("Não foi possível reenviar o código", { description: resultado.erro })
+        // 429: trava o botão pelo tempo que o backend pediu.
+        if (resultado.esperaSegundos) setEspera(resultado.esperaSegundos)
       }
     })
   }
@@ -111,11 +129,26 @@ function EtapaCodigo({
       <div className="flex gap-3 rounded-lg bg-secondary p-3 text-sm">
         <MailCheckIcon className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
         <p>
-          Enviamos um código de 6 dígitos para <strong className="break-all">{email}</strong>.{" "}
+          {envioNeutro ? (
+            <>
+              Se existir uma conta com <strong className="break-all">{email}</strong>, enviamos um código de 6
+              dígitos. Não tem conta?{" "}
+              <Suspense fallback={<Link href="/registo" className={classeLinkTexto}>Criar conta</Link>}>
+                <LinkComDestino href="/registo" className={classeLinkTexto}>
+                  Criar conta
+                </LinkComDestino>
+              </Suspense>
+              .{" "}
+            </>
+          ) : (
+            <>
+              Enviamos um código de 6 dígitos para <strong className="break-all">{email}</strong>.{" "}
+            </>
+          )}
           <button
             type="button"
             onClick={aoTrocarEmail}
-            className="rounded-sm font-semibold text-destaque underline-offset-4 outline-none hover:text-marca hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+            className={classeLinkTexto}
           >
             Trocar email
           </button>
@@ -188,3 +221,6 @@ function EtapaCodigo({
     </div>
   )
 }
+
+const classeLinkTexto =
+  "rounded-sm font-semibold text-destaque underline-offset-4 outline-none hover:text-marca hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"

@@ -23,7 +23,7 @@ import { TAMANHO_MAXIMO_FOTO, TIPOS_FOTO_ACEITOS } from "@/lib/regras-anuncio"
 // O select mostra o nome da vitrine, mas envia o valor no singular esperado pela API.
 const itensCategoria = categorias.map((c) => ({ value: c.valorApi, label: c.nome }))
 
-export function FormularioAnuncio() {
+export function FormularioAnuncio({ whatsappInicial }: { whatsappInicial: string }) {
   const router = useRouter()
   const [enviando, startTransition] = useTransition()
 
@@ -114,6 +114,28 @@ export function FormularioAnuncio() {
 
         <Campo id="modeloCelular" label="Modelo do celular">
           <Input id="modeloCelular" name="modeloCelular" required maxLength={80} placeholder="Ex: iPhone 13" className="h-10" />
+        </Campo>
+
+        <Campo
+          id="whatsapp"
+          label="WhatsApp para contato"
+          dica="Compradores falam com você por aqui. Este número fica salvo no seu perfil."
+        >
+          <Input
+            id="whatsapp"
+            name="whatsapp"
+            type="tel"
+            required
+            inputMode="tel"
+            autoComplete="tel-national"
+            defaultValue={whatsappInicial}
+            // Aceita máscara; a action remove tudo o que não é dígito. O navegador
+            // compila o pattern com a flag `v`, que exige escapar ( ) + - na classe.
+            pattern="^[\d\s\(\)\+\-]{10,20}$"
+            title="Informe o número com DDD (ex: (11) 99999-8888)"
+            placeholder="(11) 99999-8888"
+            className="h-10"
+          />
         </Campo>
 
         <Campo id="foto" label="Foto" dica="JPG, PNG ou WebP, até 5 MB.">
