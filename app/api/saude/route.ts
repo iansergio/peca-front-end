@@ -1,7 +1,7 @@
 import { connection } from "next/server"
 
 /**
- * Health check do App Service (`/api/saude`). Não chama o backend: só diz que
+ * Health check das probes do Container Apps (`/api/saude`). Não chama o backend: só diz que
  * o servidor Node está de pé, para uma queda da API não derrubar o front.
  *
  * `connection()` faz a rota rodar a cada requisição: sem ele, com Cache

@@ -20,6 +20,7 @@ Outros comandos:
 | --- | --- |
 | `npm run lint` | ESLint |
 | `npm run build` | Build de produção (gera `.next/standalone`) |
+| `docker build -t peca-front-end .` | Imagem de produção (a mesma do deploy) |
 | `npm run start` | Sobe o build com `next start` |
 
 ## Variáveis de ambiente
@@ -28,10 +29,12 @@ Outros comandos:
 | --- | --- | --- | --- |
 | `API_URL` | Sim | `http://localhost:8080/api` | URL base da API, com `/api` e sem barra no final. Em produção, sempre HTTPS. Lida só no servidor. |
 
-Em produção também entram `NODE_ENV`, `HOSTNAME` e `PORT`. Eles estão descritos no guia de deploy.
+Na imagem Docker, `NODE_ENV`, `HOSTNAME` e `PORT` já vêm definidos. Eles estão descritos no guia de deploy.
 
 Nunca commite `.env.local` nem outros arquivos com segredos.
 
 ## Deploy
 
-Azure App Service (Linux, Node 24), com deploy automático a cada push na `main` via GitHub Actions. Configuração, health check (`/api/saude`) e rollback estão em [docs/deploy-azure.md](docs/deploy-azure.md).
+Azure Container Apps, com deploy automático a cada push na `main` via GitHub Actions (imagem no GHCR). Configuração, health check (`/api/saude`) e rollback estão em [docs/deploy-azure.md](docs/deploy-azure.md).
+
+Produção: https://peca-web.thankfulglacier-8a723f55.canadacentral.azurecontainerapps.io

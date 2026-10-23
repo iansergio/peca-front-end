@@ -37,7 +37,7 @@
 - [ ] Login de email sem conta respondido pelo backend sem erro (hoje o backend exige `nome` e responde 400; o front trata como envio neutro até o ajuste no `peca-backend`).
 
 ## Fase 5: Deploy
-- [-] Workflow do GitHub Actions para o Azure App Service (build `standalone`, pacote só com `.next/standalone`, Node 24, deploy por OIDC na `main`).
+- [-] Deploy no Azure Container Apps (`peca-web`): `Dockerfile` com build `standalone`, workflow com lint/tsc/build em PR e imagem no GHCR + `az containerapp update` por OIDC na `main`.
 - [-] Rota de health check `/api/saude` (dinâmica, sem depender do backend).
-- [-] Documentação do deploy (`docs/deploy-azure.md`: App Settings, startup `node server.js`, HTTPS, Always On, health check, rede e rollback) e README em português.
-- [ ] Validar o deploy no App Service real com o backend em produção.
+- [-] Documentação do deploy (`docs/deploy-azure.md`: configuração do Container App, variáveis, probes, rede e rollback) e README em português.
+- [ ] Validar o deploy no Container App real com o backend em produção.

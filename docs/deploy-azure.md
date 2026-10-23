@@ -1,112 +1,104 @@
-# Deploy no Azure App Service
+# Deploy no Azure Container Apps
 
-O front roda no App Service **`peca-front-end`** (Linux, Node 24). O build gera `.next/standalone` (`output: "standalone"` no `next.config.ts`): um `server.js` mínimo com só os `node_modules` usados. O App Service roda `node server.js`, sem `npm install` nem build no servidor.
+O front roda no Container App **`peca-web`**, no mesmo ambiente do backend (`peca-env`, resource group `rg-peca-app`, Canada Central, assinatura `d1f4984b-…`).
+
+- URL: https://peca-web.thankfulglacier-8a723f55.canadacentral.azurecontainerapps.io
+- A imagem vem do [`Dockerfile`](../Dockerfile): build com `output: "standalone"`, e o runtime roda só `node server.js` com os `node_modules` rastreados, como usuário `node`, na porta 3000.
 
 ## Como o deploy acontece
 
-A cada push na `main` (ou manualmente, em **Actions → Run workflow**), o workflow [`.github/workflows/main_peca-front-end.yml`](../.github/workflows/main_peca-front-end.yml) faz:
+O workflow [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) tem dois jobs:
 
-1. `npm ci` e `npm run build` no runner (Node 24).
-2. Copia `.next/static` para `.next/standalone/.next/static` e `public` para `.next/standalone/public` (se a pasta existir).
-3. Zipa **só o conteúdo** de `.next/standalone`, incluindo a pasta oculta `.next` e sem arquivos `.env*`.
-4. Faz login no Azure por OIDC (segredos `AZUREAPPSERVICE_*` do repositório) e publica o zip com `azure/webapps-deploy`.
+1. **`verificacao`** (todo PR para a `main` e todo push): `npm ci`, `npm run lint`, `npx tsc --noEmit` e `npm run build`.
+2. **`deploy`** (só em push na `main` ou disparo manual a partir da `main`):
+   1. build da imagem;
+   2. push para `ghcr.io/iansergio/peca-front-end:<sha>` e `:latest`;
+   3. login no Azure por OIDC;
+   4. `az containerapp update --image …:<sha>`.
 
-> **OIDC e `environment`:** a credencial federada atual aceita tokens com subject `repo:iansergio/peca-front-end:ref:refs/heads/main`. Por isso:
-> - o deploy só funciona disparado a partir da `main`;
-> - o job **não** usa `environment:`. Com ele, o subject passaria a ser `...:environment:Production`.
->
-> Para usar um environment (com aprovação manual, por exemplo), crie antes uma credencial federada com esse subject na identidade do Azure e só depois adicione `environment: Production` ao job `deploy`.
+Cada deploy cria uma revisão nova. Como o modo é *Single*, o tráfego passa para ela quando as probes ficam verdes.
 
-## Configuração do App Service (uma vez)
+**Login no Azure (OIDC, sem senha):**
+- Segredos do repositório: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` e `AZURE_SUBSCRIPTION_ID`.
+- Identidade: `oidc-msi-918b` (resource group `rg-peca-app`).
+- Credencial federada com subject `repo:iansergio@80067694/peca-front-end@1422292249:ref:refs/heads/main`. Por isso o deploy só funciona disparado a partir da `main`.
+- Permissões: **Contributor só no `peca-web`** e **Reader no `peca-env`**.
 
-Rode os comandos com uma conta que tenha acesso ao app. Confira a assinatura antes: o App Service não está na mesma assinatura do backend.
+> Para usar um `environment:` no job (aprovação manual, por exemplo), crie antes outra credencial federada com o subject `...:environment:<nome>`. Sem ela, o login falha.
 
-```bash
-az account list --query "[].{nome:name, id:id}" -o table
-az account set --subscription "<assinatura-do-front>"
+## Configuração atual do Container App
 
-APP=peca-front-end
-RG=$(az webapp list --query "[?name=='$APP'].resourceGroup | [0]" -o tsv)
-echo "$RG"   # precisa imprimir o resource group; vazio = assinatura errada
-```
-
-### Runtime e comando de inicialização
-
-O runtime precisa ser o mesmo Node do build (24). Veja os disponíveis com `az webapp list-runtimes --os linux`.
-
-```bash
-az webapp config set -g "$RG" -n "$APP" \
-  --linux-fx-version "NODE|24-lts" \
-  --startup-file "node server.js"
-```
-
-### Variáveis (App Settings)
-
-```bash
-az webapp config appsettings set -g "$RG" -n "$APP" --settings \
-  API_URL="https://<host-do-backend>/api" \
-  NODE_ENV=production \
-  HOSTNAME=0.0.0.0 \
-  PORT=8080 \
-  WEBSITES_PORT=8080 \
-  SCM_DO_BUILD_DURING_DEPLOYMENT=false
-```
-
-| Variável | Por quê |
+| Item | Valor |
 | --- | --- |
-| `API_URL` | URL da API com `/api`, **HTTPS** e sem barra no final. Lida só no servidor, em tempo de execução: trocar não exige novo build, só reiniciar o app. |
-| `NODE_ENV=production` | Cookies de sessão com `Secure` e o Next em modo de produção. |
-| `HOSTNAME=0.0.0.0` | O `server.js` precisa escutar em todas as interfaces, não só em `localhost`, para o proxy do App Service alcançar. |
-| `PORT=8080` / `WEBSITES_PORT=8080` | Porta em que o `server.js` escuta e para onde o App Service encaminha. |
-| `SCM_DO_BUILD_DURING_DEPLOYMENT=false` | O pacote já vem pronto. Sem isso, o Oryx tentaria rodar `npm install` e build no servidor. |
+| Ingress | Externo, HTTPS, porta de destino 3000 |
+| Recursos | 0,5 vCPU / 1 GiB |
+| Escala | mín. 0 / máx. 1 (dorme sem tráfego; a cota grátis mensal cobre o uso) |
+| Probes | Startup, Liveness e Readiness em `GET /api/saude` |
+| Registry | `ghcr.io`, usuário `iansergio`, senha no secret `ghcrio-iansergio` (token com só `read:packages`, o mesmo do backend) |
 
-### HTTPS, Always On e health check
+Variáveis de ambiente:
 
-```bash
-az webapp update -g "$RG" -n "$APP" --https-only true
+| Variável | Valor | Por quê |
+| --- | --- | --- |
+| `API_URL` | `https://peca-api.thankfulglacier-8a723f55.canadacentral.azurecontainerapps.io/api` | URL da API, com `/api`, HTTPS e sem barra no final. Lida em runtime: trocar não exige nova imagem. |
+| `NODE_ENV` | `production` | Cookies de sessão com `Secure`. A imagem já define. |
+| `HOSTNAME` | `0.0.0.0` | O `server.js` escuta em todas as interfaces. A imagem já define. |
+| `PORT` | `3000` | Igual à porta de destino do ingress. A imagem já define. |
 
-# Always On evita o "sono" do app após inatividade. Não existe no plano Free (F1).
-az webapp config set -g "$RG" -n "$APP" --always-on true
-
-# Health check: o App Service chama /api/saude e tira de rotação a instância que falhar.
-az webapp config set -g "$RG" -n "$APP" \
-  --generic-configurations '{"healthCheckPath": "/api/saude"}'
-```
-
-A rota `/api/saude` devolve `{"status":"ok"}` e **não** chama o backend: uma queda da API não derruba o front. A vitrine continua de pé e mostra o aviso amigável.
-
-### Conferir
+Trocar a URL da API:
 
 ```bash
-az webapp config show -g "$RG" -n "$APP" \
-  --query "{runtime:linuxFxVersion, startup:appCommandLine, alwaysOn:alwaysOn, health:healthCheckPath}"
-az webapp config appsettings list -g "$RG" -n "$APP" --query "[].name" -o tsv
-curl -s "https://$(az webapp show -g "$RG" -n "$APP" --query defaultHostName -o tsv)/api/saude"
+az containerapp update -g rg-peca-app -n peca-web \
+  --set-env-vars API_URL="https://<host-do-backend>/api"
 ```
+
+### Como foi criado (referência)
+
+```bash
+az containerapp create -g rg-peca-app -n peca-web --environment peca-env \
+  --image <imagem-inicial> \
+  --ingress external --target-port 3000 \
+  --min-replicas 0 --max-replicas 1 --cpu 0.5 --memory 1Gi \
+  --registry-server ghcr.io --registry-username iansergio --registry-password "<token read:packages>" \
+  --env-vars API_URL=https://<host-do-backend>/api NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000
+
+# Permissões mínimas da identidade do deploy
+P=$(az identity show -g rg-peca-app -n oidc-msi-918b --query principalId -o tsv)
+az role assignment create --assignee-object-id $P --assignee-principal-type ServicePrincipal \
+  --role Contributor --scope $(az containerapp show -g rg-peca-app -n peca-web --query id -o tsv)
+az role assignment create --assignee-object-id $P --assignee-principal-type ServicePrincipal \
+  --role Reader --scope $(az containerapp env show -g rg-peca-app -n peca-env --query id -o tsv)
+```
+
+> **Pegadinha:** o Azure descarta a configuração do registry `ghcr.io` quando nenhuma imagem do app vem dele. Se o app for recriado com uma imagem pública de outro registry (ex.: `mcr.microsoft.com/...`), o registry some na hora. Crie o app já com uma imagem do `ghcr.io`, ou troque imagem e registry no mesmo `PATCH`.
 
 ## Backend, rede e CORS
 
-- **CORS não é necessário.** O navegador só fala com o front; quem chama a API é o servidor Node do App Service.
-- **Firewall do backend.** Hoje a API (Container Apps) aceita tráfego público. Se um dia o ingress ou um firewall restringir por IP, libere os IPs de saída do App Service:
+- **CORS não é necessário.** O navegador só fala com o front, e quem chama a API é o servidor Node do container.
+- **Firewall.** A API aceita tráfego público. O banco (Azure SQL) só precisa liberar o backend, não o front.
+- **Limite por IP do OTP.** O front repassa o IP do visitante em `X-Forwarded-For`, usando a última entrada do header, que é a que o ingress do Container Apps acrescenta. O backend deve confiar nesse header só quando a requisição vier do front.
+- **Cold start.** Front e backend escalam a zero.
+  - A primeira visita depois de um tempo parado espera o front subir (alguns segundos).
+  - A chamada à API pode ainda passar do timeout do front (8 s na vitrine, 10 s nas demais) enquanto o backend e o Azure SQL acordam. Nesse caso a página mostra o aviso amigável, e a próxima tentativa funciona.
 
-  ```bash
-  az webapp show -g "$RG" -n "$APP" --query possibleOutboundIpAddresses -o tsv
-  ```
+## Conferir
 
-  Use `possibleOutboundIpAddresses`, e não só `outboundIpAddresses`: a lista completa cobre uma troca de plano ou de escala. O banco (Azure SQL) só precisa liberar o backend, não o front.
-- **Limite por IP do OTP.** O front repassa o IP do visitante em `X-Forwarded-For`, pegando a última entrada do header que o App Service acrescenta. O backend deve confiar nesse header só quando a conexão vier do front.
-- **Cold start.** O backend escala a zero. A primeira requisição depois de um tempo parado pode passar do timeout do front (8 s na vitrine, 10 s nas demais). Nesse caso a página mostra o aviso amigável, e a próxima tentativa funciona.
+```bash
+az containerapp revision list -g rg-peca-app -n peca-web \
+  --query "[].{rev:name, ativa:properties.active, saude:properties.healthState, img:properties.template.containers[0].image}" -o table
+curl -s https://peca-web.thankfulglacier-8a723f55.canadacentral.azurecontainerapps.io/api/saude
+```
 
 ## Rollback
 
-1. **Reverter o commit (preferível):** `git revert <sha>` e push na `main`. O workflow publica a versão anterior.
-2. **Reexecutar um deploy antigo que funcionou:** em **Actions**, abra a execução boa e use **Re-run all jobs**, ou rode `gh run rerun <run-id>`. A execução refaz o build do commit daquela vez. Como ela continua ligada a `refs/heads/main`, o login OIDC funciona.
-3. **Publicar um zip já gerado** (artefatos ficam 7 dias):
+1. **Reverter o commit (preferível):** `git revert <sha>` e push na `main`.
+2. **Voltar para uma imagem anterior,** sem rebuild. Toda imagem fica no GHCR com o SHA do commit:
 
    ```bash
-   gh run download <run-id> -n node-app      # baixa release.zip
-   az webapp deploy -g "$RG" -n "$APP" --src-path release.zip --type zip
+   az containerapp update -g rg-peca-app -n peca-web --image ghcr.io/iansergio/peca-front-end:<sha-bom>
    ```
+
+3. **Reexecutar um deploy antigo que funcionou:** `gh run rerun <run-id>`. Continua ligado a `refs/heads/main`, então o OIDC funciona.
 
 Depois de qualquer rollback, confira `/api/saude` e a home.
 
@@ -115,8 +107,16 @@ Depois de qualquer rollback, confira `/api/saude` e a home.
 ## Logs
 
 ```bash
-az webapp log config -g "$RG" -n "$APP" --docker-container-logging filesystem
-az webapp log tail -g "$RG" -n "$APP"
+az containerapp logs show -g rg-peca-app -n peca-web --follow
 ```
 
-Os `console.error` do front aparecem com prefixos como `[auth]`, `[perfil]` e `[criarAnuncio]`.
+O ambiente não tem Log Analytics, então os logs servem só para acompanhar ao vivo. Os `console.error` do front aparecem com prefixos como `[auth]`, `[perfil]` e `[criarAnuncio]`.
+
+## Rodar a imagem localmente
+
+```bash
+docker build -t peca-front-end .
+# No Linux, o --add-host faz host.docker.internal apontar para a máquina (backend local)
+docker run --rm -p 3000:3000 --add-host=host.docker.internal:host-gateway \
+  -e API_URL=http://host.docker.internal:8080/api peca-front-end
+```
