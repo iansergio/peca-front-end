@@ -15,7 +15,7 @@
 - [-] Tela de Login OTP — Etapa 2: inserir o código OTP recebido por email (com reenvio do código).
 - [-] Menu da conta e "Sair" no header adaptados ao fluxo OTP.
 - [-] Tela de Cadastro sem senha (Nome, Email e WhatsApp) com confirmação do email por OTP.
-- [ ] Interface de Perfil do Usuário (com campo para número de WhatsApp).
+- [-] Interface de Perfil do Usuário (`/perfil`: nome e WhatsApp editáveis, email só leitura) e link "Meu perfil" no menu da conta.
 
 ## Fase 3: Vitrine e Fluxo de Venda
 - [x] Tela da Vitrine (Listagem de peças com grid responsivo).
@@ -33,3 +33,5 @@
 - [x] Conectar listagem de peças com a API REST.
 - [x] Conectar criação de anúncio com a API REST e upload de fotos.
 - [-] Autenticação Passwordless OTP via API (solicitar código por email e validar código), JWT em cookie httpOnly enviado como `Bearer` na criação de anúncio.
+- [-] Integração v2 com o backend: cliente HTTP único (`lib/api/cliente.ts`), `nome` só no cadastro, login com resposta neutra, limite de pedidos (429 + Retry-After) com reenvio travado, `GET /usuarios/me`, `PUT /usuarios/{id}` sem email e `whatsapp` obrigatório ao anunciar (pré-preenchido do perfil).
+- [ ] Login de email sem conta respondido pelo backend sem erro (hoje o backend exige `nome` e responde 400; o front trata como envio neutro até o ajuste no `peca-backend`).
