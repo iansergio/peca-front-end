@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ExternalLink, Smartphone } from "lucide-react"
+import { Smartphone } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -21,8 +21,8 @@ const varianteCondicao = {
 /**
  * Cartão da listagem (docs/Cartão de produto.png): foto 4:3 com o selo de
  * condição no canto, peça, modelo compatível, preço e a ação. Em listagens a
- * ação é o botão contornado: ele abre a página de detalhes (/pecas/[id]) em
- * nova aba, e é lá que fica o contato pelo WhatsApp, no botão laranja.
+ * ação é o botão contornado: ele abre a página de detalhes (/pecas/[id]) na
+ * mesma aba, e é lá que fica o contato pelo WhatsApp, no botão laranja.
  */
 export function PecaCard({ peca, prioridade = false }: { peca: Peca; prioridade?: boolean }) {
   const Icone = iconePorCategoria[peca.categoria] ?? Smartphone
@@ -68,13 +68,10 @@ export function PecaCard({ peca, prioridade = false }: { peca: Peca; prioridade?
       <CardFooter className="border-t-0 bg-transparent pb-4">
         <Link
           href={`/pecas/${peca.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`Ver detalhes de ${peca.titulo} (abre em nova aba)`}
+          aria-label={`Ver detalhes de ${peca.titulo}`}
           className={cn(buttonVariants({ variant: "outline" }), "w-full")}
         >
           Ver detalhes
-          <ExternalLink aria-hidden />
         </Link>
       </CardFooter>
     </Card>
