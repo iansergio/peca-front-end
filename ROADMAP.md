@@ -20,7 +20,12 @@
 ## Fase 3: Vitrine e Fluxo de Venda
 - [x] Tela da Vitrine (Listagem de peças com grid responsivo).
 - [x] Componente de Card de Peça (Foto, Título, Preço e Modelo do Celular).
-- [ ] Tela de Detalhes da Peça.
+- [-] Tela de Detalhes da Peça (`/pecas/[id]`, abre em nova aba pelo "Ver detalhes" do cartão; WhatsApp como CTA laranja da página).
+- [ ] Detalhes da peça com várias fotos (galeria): o backend guarda só uma `imagemUrl` por peça.
+- [ ] Localização do anunciante (cidade) e selo "técnico verificado": o backend ainda não tem esses dados.
+- [ ] Data do anúncio ("anunciada há X dias"): o backend não devolve data de criação.
+- [ ] Frete (grátis / retirada) no anúncio: o backend ainda não tem o campo.
+- [ ] Vários modelos compatíveis por peça: hoje `modeloCelular` é um texto único.
 - [x] Integração do botão "Comprar via WhatsApp" (gerando link dinâmico: `wa.me/NUMERO?text=MENSAGEM`).
 - [-] Refatoração da Landing Page: Hero Banner promocional.
 - [-] Refatoração da Landing Page: Sub-header (segunda barra de navegação) de categorias.

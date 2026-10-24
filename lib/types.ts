@@ -8,11 +8,12 @@ export type Vendedor = {
 
 export type Condicao = "Nova" | "Original" | "Retirada" | "Usada"
 
-/** Peça retornada por `GET {API_URL}/pecas`. */
+/** Peça retornada por `GET {API_URL}/pecas` e `GET {API_URL}/pecas/{id}`. */
 export type Peca = {
   id: string
   titulo: string
-  descricao: string
+  /** Opcional no anúncio: pode vir nula ou vazia. */
+  descricao: string | null
   /** Preço em reais. */
   preco: number
   /** Nome da categoria, igual ao exibido na vitrine (ex: "Telas"). */
