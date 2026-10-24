@@ -9,6 +9,7 @@
 - [x] Inicializar projeto Next.js 16 com Tailwind v4.
 - [x] Configurar shadcn/ui e paleta de cores base do e-commerce.
 - [x] Criar layout base (Header, Footer e container mobile).
+- [-] Favicon e ícones com o símbolo da logo (`favicon.ico`, `icon.svg`, `apple-icon.png` e manifest com ícones 192/512).
 
 ## Fase 2: Telas de Usuário
 - [-] Tela de Login OTP — Etapa 1: inserir email e solicitar envio do código.
