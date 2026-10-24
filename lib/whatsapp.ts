@@ -23,6 +23,20 @@ export function normalizarWhatsapp(telefone: string | null | undefined) {
   return null
 }
 
+/**
+ * Número para exibir: "(47) 98866-4667", ou "+55 (47) 98866-4667" quando vem
+ * com DDI do Brasil. Outros formatos aparecem só com os dígitos.
+ */
+export function formatarWhatsapp(telefone: string | null | undefined) {
+  if (!telefone) return null
+  const digitos = formatarTelefone(telefone)
+  const nacional = /^55\d{10,11}$/.test(digitos) ? digitos.slice(2) : digitos
+  const ddi = nacional === digitos ? "" : "+55 "
+  if (nacional.length === 11) return `${ddi}(${nacional.slice(0, 2)}) ${nacional.slice(2, 7)}-${nacional.slice(7)}`
+  if (nacional.length === 10) return `${ddi}(${nacional.slice(0, 2)}) ${nacional.slice(2, 6)}-${nacional.slice(6)}`
+  return digitos
+}
+
 /** Gera o link do WhatsApp com a mensagem de interesse, ou `null` se o vendedor não tiver número válido. */
 export function gerarLinkWhatsapp(peca: Peca) {
   const numero = normalizarWhatsapp(peca.vendedor?.whatsapp)

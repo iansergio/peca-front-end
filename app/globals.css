@@ -145,3 +145,17 @@
     @apply font-heading;
   }
 }
+
+/*
+ * Página de detalhes da peça no celular (docs/Celular anúncio.png): a barra
+ * "Detalhe da peça" substitui o header do site, e o conteúdo ganha folga no
+ * fim para a barra fixa de contato não cobrir o rodapé.
+ */
+@media (width < 64rem) {
+  body:has([data-detalhe-peca]) > header {
+    display: none;
+  }
+  body:has([data-barra-contato]) {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
+}

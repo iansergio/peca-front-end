@@ -1,14 +1,14 @@
 import Image from "next/image"
-import { MessageCircle, Smartphone } from "lucide-react"
+import Link from "next/link"
+import { ExternalLink, Smartphone } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { iconePorCategoria } from "@/components/vitrine/categorias"
 import { formatarPreco } from "@/lib/format"
 import type { Condicao, Peca } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import { gerarLinkWhatsapp } from "@/lib/whatsapp"
 
 /** Cores dos selos de condição (prancha "Botões, campos e selos"). */
 const varianteCondicao = {
@@ -20,12 +20,12 @@ const varianteCondicao = {
 
 /**
  * Cartão da listagem (docs/Cartão de produto.png): foto 4:3 com o selo de
- * condição no canto, peça, modelo compatível, preço e contato. Em listagens o
- * contato é o botão contornado; o laranja fica reservado à página do anúncio.
+ * condição no canto, peça, modelo compatível, preço e a ação. Em listagens a
+ * ação é o botão contornado: ele abre a página de detalhes (/pecas/[id]) em
+ * nova aba, e é lá que fica o contato pelo WhatsApp, no botão laranja.
  */
 export function PecaCard({ peca, prioridade = false }: { peca: Peca; prioridade?: boolean }) {
   const Icone = iconePorCategoria[peca.categoria] ?? Smartphone
-  const linkWhatsapp = gerarLinkWhatsapp(peca)
 
   return (
     <Card
@@ -66,23 +66,16 @@ export function PecaCard({ peca, prioridade = false }: { peca: Peca; prioridade?
       </CardContent>
 
       <CardFooter className="border-t-0 bg-transparent pb-4">
-        {linkWhatsapp ? (
-          <a
-            href={linkWhatsapp}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Tenho interesse em ${peca.titulo} (abre o WhatsApp em nova aba)`}
-            className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-          >
-            <MessageCircle aria-hidden />
-            Tenho interesse
-          </a>
-        ) : (
-          // Sem WhatsApp válido não há como contatar o vendedor.
-          <Button type="button" disabled className="w-full">
-            Contato indisponível
-          </Button>
-        )}
+        <Link
+          href={`/pecas/${peca.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Ver detalhes de ${peca.titulo} (abre em nova aba)`}
+          className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+        >
+          Ver detalhes
+          <ExternalLink aria-hidden />
+        </Link>
       </CardFooter>
     </Card>
   )
