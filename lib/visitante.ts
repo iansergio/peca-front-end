@@ -4,10 +4,10 @@ import { headers } from "next/headers"
  * IP de quem está usando o site, para o backend aplicar o limite por IP do OTP
  * (o front chama o backend pelo servidor, então o backend só veria o IP do front).
  *
- * Usa a entrada mais à DIREITA do `X-Forwarded-For`: é a que o proxy do
- * Azure App Service acrescenta com o IP real. As da esquerda vêm do próprio
- * cliente e podem ser forjadas. O App Service manda "ip:porta"; a porta é
- * removida. Em desenvolvimento (sem proxy) devolve `null`.
+ * Usa a entrada mais à DIREITA do `X-Forwarded-For`: é a que o ingress do
+ * Azure Container Apps acrescenta com o IP real. As da esquerda vêm do próprio
+ * cliente e podem ser forjadas. Se vier "ip:porta", a porta é removida.
+ * Em desenvolvimento (sem proxy) devolve `null`.
  */
 export async function ipDoVisitante() {
   const valor = (await headers()).get("x-forwarded-for")

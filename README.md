@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PEÇA — Front-end
 
-## Getting Started
+Vitrine e anúncios de peças de celular. Feito com Next.js 16 (App Router, Cache Components), Tailwind v4 e shadcn/ui.
 
-First, run the development server:
+O front fala com a [API do PEÇA](https://github.com/iansergio/peca-backend) **só pelo servidor** (Server Components e Server Actions). O JWT fica num cookie httpOnly, e o navegador nunca chama o backend, então não é preciso configurar CORS.
+
+## Rodando localmente
+
+Requisitos: Node.js 24 e o backend rodando (por padrão em `http://localhost:8080`).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+cp .env.example .env.local   # ajuste o API_URL se precisar
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Outros comandos:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Comando | O que faz |
+| --- | --- |
+| `npm run lint` | ESLint |
+| `npm run build` | Build de produção (gera `.next/standalone`) |
+| `docker build -t peca-front-end .` | Imagem de produção (a mesma do deploy) |
+| `npm run start` | Sobe o build com `next start` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Variáveis de ambiente
 
-## Learn More
+| Variável | Obrigatória | Exemplo | Descrição |
+| --- | --- | --- | --- |
+| `API_URL` | Sim | `http://localhost:8080/api` | URL base da API, com `/api` e sem barra no final. Em produção, sempre HTTPS. Lida só no servidor. |
 
-To learn more about Next.js, take a look at the following resources:
+Na imagem Docker, `NODE_ENV`, `HOSTNAME` e `PORT` já vêm definidos. Eles estão descritos no guia de deploy.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Nunca commite `.env.local` nem outros arquivos com segredos.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
+Azure Container Apps, com deploy automático a cada push na `main` via GitHub Actions (imagem no GHCR). Configuração, health check (`/api/saude`) e rollback estão em [docs/deploy-azure.md](docs/deploy-azure.md).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Produção: https://peca-web.thankfulglacier-8a723f55.canadacentral.azurecontainerapps.io
