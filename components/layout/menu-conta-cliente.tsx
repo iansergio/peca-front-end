@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useTransition } from "react"
-import { LogOutIcon, UserIcon, UserRoundPenIcon } from "lucide-react"
+import { LogOutIcon, PackageIcon, UserIcon, UserRoundPenIcon } from "lucide-react"
 
 import { sair } from "@/app/login/actions"
 import { classeLinkHeader } from "@/components/layout/estilos"
@@ -55,6 +55,10 @@ export function MenuContaCliente({ nome }: { nome: string | null }) {
               <DropdownMenuItem className="min-h-11" render={<Link href="/perfil" />}>
                 <UserRoundPenIcon />
                 Meu perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem className="min-h-11" render={<Link href="/perfil?aba=anuncios" />}>
+                <PackageIcon />
+                Meus anúncios
               </DropdownMenuItem>
               <DropdownMenuItem variant="destructive" className="min-h-11" disabled={saindo} onClick={handleSair}>
                 <LogOutIcon />

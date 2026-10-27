@@ -4,12 +4,14 @@ import { COOKIE_SESSAO, lerPayloadJwt } from "@/lib/jwt"
 
 /** Rotas que exigem login. */
 const ROTAS_PROTEGIDAS = ["/anunciar", "/perfil"]
+/** Edição de anúncio (`/pecas/{id}/editar`): também exige login. */
+const ROTA_EDITAR = /^\/pecas\/[^/]+\/editar$/
 /** Rotas que não fazem sentido para quem já está logado. */
 const ROTAS_VISITANTE = ["/login", "/registo"]
 
 /**
  * Checagem otimista (só olha o cookie, sem chamar o backend): evita renderizar
- * /anunciar e /perfil para quem não está logado. As Server Actions conferem a
+ * /anunciar, /perfil e a edição de anúncio para quem não está logado. As Server Actions conferem a
  * sessão de novo, e o backend valida o token de verdade.
  */
 export function proxy(request: NextRequest) {
@@ -17,7 +19,7 @@ export function proxy(request: NextRequest) {
   const logado = token ? lerPayloadJwt(token) !== null : false
   const { pathname } = request.nextUrl
 
-  if (!logado && ROTAS_PROTEGIDAS.includes(pathname)) {
+  if (!logado && (ROTAS_PROTEGIDAS.includes(pathname) || ROTA_EDITAR.test(pathname))) {
     const url = new URL("/login", request.url)
     url.searchParams.set("destino", pathname)
     return NextResponse.redirect(url)
@@ -30,5 +32,5 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   // Precisa ser literal (o Next lê em tempo de build): manter igual às listas acima.
-  matcher: ["/anunciar", "/perfil", "/login", "/registo"],
+  matcher: ["/anunciar", "/perfil", "/pecas/:id/editar", "/login", "/registo"],
 }
