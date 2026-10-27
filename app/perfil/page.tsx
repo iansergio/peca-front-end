@@ -5,7 +5,9 @@ import { Suspense } from "react";
 import { UserXIcon } from "lucide-react";
 
 import type { Usuario } from "@/lib/api/auth";
+import { AbasPerfil, type Aba } from "@/components/perfil/abas-perfil";
 import { FormularioPerfil, FormularioPerfilCarregando } from "@/components/perfil/formulario-perfil";
+import { MeusAnuncios, MeusAnunciosCarregando } from "@/components/perfil/meus-anuncios";
 import { ErroApi } from "@/lib/api/erros";
 import { buscarMeuPerfil } from "@/lib/api/perfil";
 import { lerSessao } from "@/lib/sessao";
@@ -14,20 +16,44 @@ export const metadata: Metadata = {
   title: "Meu perfil - PEÇA",
 };
 
-export default function PerfilPage() {
+export default function PerfilPage({ searchParams }: PageProps<"/perfil">) {
   return (
-    <div className="mx-auto w-full max-w-md">
+    <div className="mx-auto w-full max-w-2xl">
       <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">Meu perfil</h1>
-      <p className="mt-1 mb-6 text-muted-foreground">
-        Seu nome e WhatsApp aparecem para os compradores nos seus anúncios.
+      <p className="mt-1 mb-4 text-muted-foreground">
+        Seus dados de contato e as peças que você anunciou.
       </p>
-      <div className="rounded-2xl border bg-card p-4 md:p-6">
-        {/* Lê o cookie e chama o backend: com Cache Components, fica atrás do Suspense. */}
-        <Suspense fallback={<FormularioPerfilCarregando />}>
-          <PerfilDoUsuario />
-        </Suspense>
-      </div>
+      {/* `searchParams` é dado de requisição: com Cache Components, fica atrás do Suspense. */}
+      <Suspense fallback={<FormularioPerfilCarregando />}>
+        <Abas searchParams={searchParams} />
+      </Suspense>
     </div>
+  );
+}
+
+async function Abas({ searchParams }: Pick<PageProps<"/perfil">, "searchParams">) {
+  const { aba } = await searchParams;
+  const abaInicial: Aba = aba === "anuncios" ? "anuncios" : "dados";
+
+  return (
+    <AbasPerfil
+      abaInicial={abaInicial}
+      dados={
+        <div className="rounded-xl bg-card p-4 shadow-cartao md:p-6">
+          <p className="mb-5 text-sm text-muted-foreground">
+            Seu nome e WhatsApp aparecem para os compradores nos seus anúncios.
+          </p>
+          <Suspense fallback={<FormularioPerfilCarregando />}>
+            <PerfilDoUsuario />
+          </Suspense>
+        </div>
+      }
+      anuncios={
+        <Suspense fallback={<MeusAnunciosCarregando />}>
+          <MeusAnuncios />
+        </Suspense>
+      }
+    />
   );
 }
 

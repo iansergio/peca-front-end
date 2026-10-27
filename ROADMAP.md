@@ -17,6 +17,8 @@
 - [-] Menu da conta e "Sair" no header adaptados ao fluxo OTP.
 - [-] Tela de Cadastro sem senha (Nome, Email e WhatsApp) com confirmação do email por OTP.
 - [-] Interface de Perfil do Usuário (`/perfil`: nome e WhatsApp editáveis, email só leitura) e link "Meu perfil" no menu da conta.
+- [-] Aba "Meus anúncios" no perfil (`/perfil?aba=anuncios`) com link no menu da conta: lista as peças da pessoa com "Editar".
+- [ ] "Meus anúncios" com endpoint próprio no backend: hoje o front filtra `GET /pecas` pelo `vendedor.id` (não escala com paginação).
 
 ## Fase 3: Vitrine e Fluxo de Venda
 - [x] Tela da Vitrine (Listagem de peças com grid responsivo).
@@ -38,6 +40,7 @@
 ## Fase 4: Integração com Backend
 - [x] Conectar listagem de peças com a API REST.
 - [x] Conectar criação de anúncio com a API REST e upload de fotos.
+- [-] Tela de edição do anúncio (`/pecas/[id]/editar`): dados pré-preenchidos, troca opcional da foto com prévia (`PUT /pecas/{id}` + `POST /pecas/{id}/imagem`), exclusão com confirmação (`DELETE /pecas/{id}`) e rota protegida no Proxy.
 - [-] Autenticação Passwordless OTP via API (solicitar código por email e validar código), JWT em cookie httpOnly enviado como `Bearer` na criação de anúncio.
 - [-] Integração v2 com o backend: cliente HTTP único (`lib/api/cliente.ts`), `nome` só no cadastro, login com resposta neutra, limite de pedidos (429 + Retry-After) com reenvio travado, `GET /usuarios/me`, `PUT /usuarios/{id}` sem email e `whatsapp` obrigatório ao anunciar (pré-preenchido do perfil).
 - [ ] Login de email sem conta respondido pelo backend sem erro (hoje o backend exige `nome` e responde 400; o front trata como envio neutro até o ajuste no `peca-backend`).

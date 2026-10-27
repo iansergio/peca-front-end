@@ -6,22 +6,8 @@ import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { publicarAnuncio } from "@/app/anunciar/actions"
+import { CamposAnuncio, conferirTamanhoFoto } from "@/components/anuncio/campos-anuncio"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { categorias } from "@/components/vitrine/categorias"
-import { TAMANHO_MAXIMO_FOTO, TIPOS_FOTO_ACEITOS } from "@/lib/regras-anuncio"
-
-// O select mostra o nome da vitrine, mas envia o valor no singular esperado pela API.
-const itensCategoria = categorias.map((c) => ({ value: c.valorApi, label: c.nome }))
 
 export function FormularioAnuncio({ whatsappInicial }: { whatsappInicial: string }) {
   const router = useRouter()
@@ -33,10 +19,9 @@ export function FormularioAnuncio({ whatsappInicial }: { whatsappInicial: string
     evento.preventDefault()
     const formData = new FormData(evento.currentTarget)
 
-    const foto = formData.get("foto")
-    if (foto instanceof File && foto.size > TAMANHO_MAXIMO_FOTO) {
-      const mb = (foto.size / 1024 / 1024).toFixed(1).replace(".", ",")
-      toast.error("A foto deve ter no máximo 5 MB.", { description: `A foto escolhida tem ${mb} MB.` })
+    const fotoGrande = conferirTamanhoFoto(formData)
+    if (fotoGrande) {
+      toast.error("A foto deve ter no máximo 5 MB.", { description: fotoGrande })
       return
     }
 
@@ -65,89 +50,8 @@ export function FormularioAnuncio({ whatsappInicial }: { whatsappInicial: string
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-      <fieldset disabled={enviando} className="flex flex-col gap-5">
-        <legend className="mb-4 text-lg font-bold">Sobre a peça</legend>
-
-        <Campo id="titulo" label="Título">
-          <Input id="titulo" name="titulo" required maxLength={120} placeholder="Ex: Tela OLED iPhone 13" className="h-10" />
-        </Campo>
-
-        <Campo id="descricao" label="Descrição" opcional>
-          <Textarea
-            id="descricao"
-            name="descricao"
-            maxLength={2000}
-            rows={4}
-            placeholder="Estado, garantia, detalhes de compatibilidade..."
-          />
-        </Campo>
-
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Campo id="preco" label="Preço (R$)">
-            <Input
-              id="preco"
-              name="preco"
-              required
-              inputMode="decimal"
-              pattern="^\d+([.,]\d{1,2})?$"
-              title="Use apenas números, com até 2 casas decimais (ex: 289,90)"
-              placeholder="0,00"
-              className="h-10"
-            />
-          </Campo>
-
-          <Campo id="categoria" label="Categoria">
-            <Select name="categoria" items={itensCategoria} required>
-              <SelectTrigger id="categoria" className="h-10 w-full">
-                <SelectValue placeholder="Escolha a categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                {itensCategoria.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                    {item.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Campo>
-        </div>
-
-        <Campo id="modeloCelular" label="Modelo do celular">
-          <Input id="modeloCelular" name="modeloCelular" required maxLength={80} placeholder="Ex: iPhone 13" className="h-10" />
-        </Campo>
-
-        <Campo
-          id="whatsapp"
-          label="WhatsApp para contato"
-          dica="Compradores falam com você por aqui. Este número fica salvo no seu perfil."
-        >
-          <Input
-            id="whatsapp"
-            name="whatsapp"
-            type="tel"
-            required
-            inputMode="tel"
-            autoComplete="tel-national"
-            defaultValue={whatsappInicial}
-            // Aceita máscara; a action remove tudo o que não é dígito. O navegador
-            // compila o pattern com a flag `v`, que exige escapar ( ) + - na classe.
-            pattern="^[\d\s\(\)\+\-]{10,20}$"
-            title="Informe o número com DDD (ex: (11) 99999-8888)"
-            placeholder="(11) 99999-8888"
-            className="h-10"
-          />
-        </Campo>
-
-        <Campo id="foto" label="Foto" dica="JPG, PNG ou WebP, até 5 MB.">
-          <Input
-            id="foto"
-            name="foto"
-            type="file"
-            required
-            accept={TIPOS_FOTO_ACEITOS.join(",")}
-            className="h-10 py-1.5"
-          />
-        </Campo>
+      <fieldset disabled={enviando} className="flex flex-col gap-6">
+        <CamposAnuncio whatsappInicial={whatsappInicial} />
       </fieldset>
 
       <Button type="submit" disabled={enviando} className="h-11 w-full text-base sm:w-auto sm:self-end sm:px-8">
@@ -161,30 +65,5 @@ export function FormularioAnuncio({ whatsappInicial }: { whatsappInicial: string
         )}
       </Button>
     </form>
-  )
-}
-
-function Campo({
-  id,
-  label,
-  opcional,
-  dica,
-  children,
-}: {
-  id: string
-  label: string
-  opcional?: boolean
-  dica?: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={id}>
-        {label}
-        {opcional && <span className="font-normal text-muted-foreground">(opcional)</span>}
-      </Label>
-      {children}
-      {dica && <p className="text-xs text-muted-foreground">{dica}</p>}
-    </div>
   )
 }
