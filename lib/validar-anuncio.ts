@@ -49,8 +49,13 @@ export function lerFormularioAnuncio(formData: FormData, { fotoObrigatoria }: { 
 
   function validar() {
     if (!titulo || !modeloCelular) return "Preencha título e modelo do celular."
+    // Mesmos limites do `PecaRequest` do backend.
+    if (titulo.length > 120) return "O título deve ter no máximo 120 caracteres."
+    if (descricao.length > 2000) return "A descrição deve ter no máximo 2000 caracteres."
+    if (modeloCelular.length > 80) return "O modelo do celular deve ter no máximo 80 caracteres."
     if (!categoriasValidas.has(categoria)) return "Escolha uma categoria."
-    if (!Number.isFinite(preco) || preco < 0.01) return "Informe um preço válido."
+    // Até 10 dígitos inteiros (`@Digits(integer = 10)`).
+    if (!Number.isFinite(preco) || preco < 0.01 || preco >= 1e10) return "Informe um preço válido."
     if (!WHATSAPP_VALIDO.test(whatsapp)) return "Informe o WhatsApp com DDD (10 a 13 dígitos)."
     if (!foto) return fotoObrigatoria ? "Escolha uma foto da peça." : null
     if (!TIPOS_FOTO_ACEITOS.includes(foto.type)) return "A foto deve ser JPG, PNG ou WebP."

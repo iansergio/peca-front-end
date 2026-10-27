@@ -2,8 +2,8 @@
 
 ## Regra de Preenchimento
 - [ ] Pendente
-- [-] Implementado, build passando, mas aguardando teste humano em tela real[cite: 2].
-- [x] Testado pelo humano no navegador/celular e aprovado[cite: 2].
+- [-] Implementado, build passando, mas aguardando teste humano em tela real.
+- [x] Testado pelo humano no navegador/celular e aprovado.
 
 ## Fase 1: Setup e Infraestrutura
 - [x] Inicializar projeto Next.js 16 com Tailwind v4.
@@ -43,10 +43,11 @@
 - [-] Tela de edição do anúncio (`/pecas/[id]/editar`): dados pré-preenchidos, troca opcional da foto com prévia (`PUT /pecas/{id}` + `POST /pecas/{id}/imagem`), exclusão com confirmação (`DELETE /pecas/{id}`) e rota protegida no Proxy.
 - [-] Autenticação Passwordless OTP via API (solicitar código por email e validar código), JWT em cookie httpOnly enviado como `Bearer` na criação de anúncio.
 - [-] Integração v2 com o backend: cliente HTTP único (`lib/api/cliente.ts`), `nome` só no cadastro, login com resposta neutra, limite de pedidos (429 + Retry-After) com reenvio travado, `GET /usuarios/me`, `PUT /usuarios/{id}` sem email e `whatsapp` obrigatório ao anunciar (pré-preenchido do perfil).
-- [ ] Login de email sem conta respondido pelo backend sem erro (hoje o backend exige `nome` e responde 400; o front trata como envio neutro até o ajuste no `peca-backend`).
+- [-] Login de email sem conta respondido pelo backend sem erro (`peca-backend#17`: `nome` só no cadastro, email sem conta responde 200 sem enviar código); removido o contorno que tratava o 400 como envio neutro.
+- [-] Contrato sincronizado com o backend: `vendedor.whatsapp` pode vir nulo (só dígitos, sem DDI) e o formulário de anúncio valida os mesmos limites do `PecaRequest` (título 120, descrição 2000, modelo 80, preço até 10 dígitos inteiros).
 
 ## Fase 5: Deploy
-- [-] Deploy no Azure Container Apps (`peca-web`): `Dockerfile` com build `standalone`, workflow com lint/tsc/build em PR e imagem no GHCR + `az containerapp update` por OIDC na `main`.
+- [-] Deploy no Azure Container Apps (`peca-web`): `Dockerfile` com build `standalone`, workflow com lint/tsc/build em PR e imagem no GHCR + `az containerapp update` por OIDC na `main`. O workflow (`.github/workflows/deploy.yml`) está todo comentado de propósito: hoje não roda CI nem deploy automático.
 - [-] Rota de health check `/api/saude` (dinâmica, sem depender do backend).
 - [-] Documentação do deploy (`docs/deploy-azure.md`: configuração do Container App, variáveis, probes, rede e rollback) e README em português.
 - [ ] Validar o deploy no Container App real com o backend em produção.

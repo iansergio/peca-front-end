@@ -24,8 +24,8 @@ export type TokenResponse = {
  *
  * - Cadastro: manda `nome`. A conta só é criada quando o código for verificado;
  *   se o email já tiver conta, o nome dela não é alterado.
- * - Login: não manda `nome`. A resposta é a mesma exista a conta ou não, para
- *   não revelar quais emails estão cadastrados.
+ * - Login: não manda `nome`. O backend responde 200 exista a conta ou não (sem
+ *   conta, nenhum código é enviado), para não revelar quais emails estão cadastrados.
  *
  * `ipVisitante` vai em `X-Forwarded-For`: como o front chama o backend pelo
  * servidor, sem ele todo mundo chegaria ao limite por IP com o IP do front.
@@ -48,14 +48,6 @@ export async function solicitarCodigo(email: string, nome?: string, ipVisitante?
 
   const detalhe = await detalheDoErro(res)
   if (res.status === 400) {
-    // Login sem nome para um email sem conta: o backend atual responde 400 por
-    // falta de `nome`. Tratamos como sucesso para não revelar que o email não
-    // existe. Quando o backend tornar `nome` opcional (ajuste pendente no
-    // peca-backend, descrito no PR deste front), ele já responde 200 nesse caso.
-    if (!nome && detalhe && /\bnome\b/i.test(detalhe) && !/\bemail\b/i.test(detalhe)) {
-      console.info("[auth] solicitar-codigo sem nome recusado (HTTP 400): tratado como envio neutro")
-      return
-    }
     console.warn("[auth] solicitar-codigo recusado (HTTP 400)", detalhe)
     throw new ErroApi("Informe um email válido.", 400)
   }

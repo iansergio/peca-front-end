@@ -35,6 +35,6 @@ Nunca commite `.env.local` nem outros arquivos com segredos.
 
 ## Deploy
 
-Azure Container Apps, com deploy automático a cada push na `main` via GitHub Actions (imagem no GHCR). Configuração, health check (`/api/saude`) e rollback estão em [docs/deploy-azure.md](docs/deploy-azure.md).
+Azure Container Apps, com imagem no GHCR. O workflow de deploy automático (`.github/workflows/deploy.yml`) está comentado no momento, então não há CI nem deploy a cada push na `main`. Configuração, health check (`/api/saude`) e rollback estão em [docs/deploy-azure.md](docs/deploy-azure.md).
 
 Produção: https://peca-web.thankfulglacier-8a723f55.canadacentral.azurecontainerapps.io

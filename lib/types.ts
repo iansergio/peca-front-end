@@ -2,8 +2,11 @@
 export type Vendedor = {
   id: string
   nome: string
-  /** Número no formato internacional, só dígitos (ex: "5511999999999"). */
-  whatsapp: string
+  /**
+   * Só dígitos, com DDD e sem DDI (10 a 13, ex: "11999998888"). Pode vir nulo:
+   * o vendedor consegue apagar o número do perfil depois de anunciar.
+   */
+  whatsapp: string | null
 }
 
 export type Condicao = "Nova" | "Original" | "Retirada" | "Usada"
