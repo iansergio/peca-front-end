@@ -4,7 +4,7 @@
 - Framework: Next.js 16 (App Router obrigatoriamente).
 - Estilização: TailwindCSS v4.
 - Componentes: shadcn/ui.
-- Deploy: Azure Container Apps (imagem Docker com `output: "standalone"` e `node server.js`, publicada no GHCR). Ver `docs/deploy-azure.md`.
+- Execução: imagem Docker com `output: "standalone"` e `node server.js`, levantada junto com o backend, o PostgreSQL e o Mailpit pelo `docker-compose.yml` do `peca-backend`. Sem serviços externos.
 
 ## Regras de Comportamento e Código
 1. Leia sempre a documentação atualizada do Next.js 16 e do Tailwind v4 antes de implementar soluções complexas.

@@ -46,8 +46,8 @@
 - [-] Login de email sem conta respondido pelo backend sem erro (`peca-backend#17`: `nome` só no cadastro, email sem conta responde 200 sem enviar código); removido o contorno que tratava o 400 como envio neutro.
 - [-] Contrato sincronizado com o backend: `vendedor.whatsapp` pode vir nulo (só dígitos, sem DDI) e o formulário de anúncio valida os mesmos limites do `PecaRequest` (título 120, descrição 2000, modelo 80, preço até 10 dígitos inteiros).
 
-## Fase 5: Deploy
-- [-] Deploy no Azure Container Apps (`peca-web`): `Dockerfile` com build `standalone`, workflow com lint/tsc/build em PR e imagem no GHCR + `az containerapp update` por OIDC na `main`. O workflow (`.github/workflows/deploy.yml`) está todo comentado de propósito: hoje não roda CI nem deploy automático.
+## Fase 5: Execução local em containers
+- [-] `Dockerfile` com build `standalone`, levantado pelo `docker-compose.yml` do `peca-backend` junto com a API, o PostgreSQL e o Mailpit, tudo numa máquina só.
 - [-] Rota de health check `/api/saude` (dinâmica, sem depender do backend).
-- [-] Documentação do deploy (`docs/deploy-azure.md`: configuração do Container App, variáveis, probes, rede e rollback) e README em português.
-- [ ] Validar o deploy no Container App real com o backend em produção.
+- [-] Fotos dos anúncios servidas pelo próprio front em `/imagens/...` (proxy para `GET /api/imagens/...` do backend), otimizadas pelo `next/image`. Substitui o Supabase Storage.
+- Removidos o deploy no Azure Container Apps (workflow e `docs/deploy-azure.md`).
