@@ -1,0 +1,31 @@
+# Lint e build de produção em todo PR para a main (sem deploy). O deploy fica em main_peca-front-end.yml.
+name: Verificação
+
+on:
+  pull_request:
+    branches: [main]
+
+# Um push novo no mesmo PR cancela a verificação anterior.
+concurrency:
+  group: verificacao-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  verificacao:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      # O build também checa os tipos (TypeScript).
+      - run: npm run build
