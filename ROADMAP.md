@@ -47,7 +47,8 @@
 - [-] Contrato sincronizado com o backend: `vendedor.whatsapp` pode vir nulo (só dígitos, sem DDI) e o formulário de anúncio valida os mesmos limites do `PecaRequest` (título 120, descrição 2000, modelo 80, preço até 10 dígitos inteiros).
 
 ## Fase 5: Deploy
-- [-] Deploy no Azure Container Apps (`peca-web`): `Dockerfile` com build `standalone`, workflow com lint/tsc/build em PR e imagem no GHCR + `az containerapp update` por OIDC na `main`. O workflow (`.github/workflows/deploy.yml`) está todo comentado de propósito: hoje não roda CI nem deploy automático.
+- [-] Deploy no Azure App Service (`peca-front-end`, Linux, Node 24): `main_peca-front-end.yml` publica o pacote `standalone` por OIDC a cada push na `main` (um deploy por vez) e `verificacao.yml` roda `npm ci`, lint e build em todo PR. O `Dockerfile` fica só para uso local.
 - [-] Rota de health check `/api/saude` (dinâmica, sem depender do backend).
-- [-] Documentação do deploy (`docs/deploy-azure.md`: configuração do Container App, variáveis, probes, rede e rollback) e README em português.
-- [ ] Validar o deploy no Container App real com o backend em produção.
+- [-] Documentação do deploy (`docs/deploy-azure.md`: runtime e startup do App Service, App Settings, health check, rede, IP do visitante e rollback) e README em português.
+- [-] IP do visitante para o limite de OTP (`lib/visitante.ts`): última entrada do `X-Forwarded-For` que o App Service acrescenta, sem a porta.
+- [ ] Validar o deploy no App Service real com o backend em produção (inclusive o formato do `X-Forwarded-For` nos logs).
