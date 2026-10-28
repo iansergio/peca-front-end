@@ -37,8 +37,8 @@ COPY --from=build --chown=node:node /app/public ./public
 USER node
 EXPOSE 3000
 
-# O Container Apps usa as próprias probes (em /api/saude); este HEALTHCHECK vale
-# para `docker run` local. Usa o fetch do Node: a imagem slim não tem curl nem wget.
+# A imagem é só para uso local (o deploy no App Service usa o pacote standalone);
+# este HEALTHCHECK vale para `docker run`. Usa o fetch do Node: a imagem slim não tem curl nem wget.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD node -e "fetch('http://localhost:'+(process.env.PORT||3000)+'/api/saude').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
 
