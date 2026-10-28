@@ -123,7 +123,3 @@ az webapp log tail -g "$RG" -n "$APP"
 ```
 
 Os `console.error` do front aparecem com prefixos como `[auth]`, `[perfil]` e `[criarAnuncio]`.
-
-## Dockerfile
-
-O `Dockerfile` não é usado no deploy (o App Service recebe o pacote standalone em zip). Ele continua no repositório só para rodar a imagem de produção localmente (`docker build -t peca-front-end .`).

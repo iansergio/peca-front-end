@@ -20,7 +20,6 @@ Outros comandos:
 | --- | --- |
 | `npm run lint` | ESLint |
 | `npm run build` | Build de produção (gera `.next/standalone`) |
-| `docker build -t peca-front-end .` | Imagem Docker para rodar o build de produção localmente (não é usada no deploy) |
 | `npm run start` | Sobe o build com `next start` |
 
 ## Variáveis de ambiente
