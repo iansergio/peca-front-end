@@ -4,7 +4,16 @@ Vitrine e anúncios de peças de celular. Feito com Next.js 16 (App Router, Cach
 
 O front fala com a [API do PEÇA](https://github.com/iansergio/peca-backend) **só pelo servidor** (Server Components e Server Actions). O JWT fica num cookie httpOnly, e o navegador nunca chama o backend, então não é preciso configurar CORS.
 
-## Rodando localmente
+## Rodando com Docker (recomendado)
+
+O front sobe junto com a API, o PostgreSQL e o Mailpit pelo `docker-compose.yml` do [peca-backend](https://github.com/iansergio/peca-backend). Com os dois repositórios lado a lado (`peca-backend/` e `peca-front-end/`):
+
+```bash
+cd ../peca-backend
+docker compose up --build   # front em http://localhost:3000, emails (códigos OTP) em http://localhost:8025
+```
+
+## Rodando com `npm run dev`
 
 Requisitos: Node.js 24 e o backend rodando (por padrão em `http://localhost:8080`).
 
@@ -20,21 +29,17 @@ Outros comandos:
 | --- | --- |
 | `npm run lint` | ESLint |
 | `npm run build` | Build de produção (gera `.next/standalone`) |
-| `docker build -t peca-front-end .` | Imagem de produção (a mesma do deploy) |
+| `docker build -t peca-front-end .` | Imagem Docker (a mesma do Compose) |
 | `npm run start` | Sobe o build com `next start` |
 
 ## Variáveis de ambiente
 
 | Variável | Obrigatória | Exemplo | Descrição |
 | --- | --- | --- | --- |
-| `API_URL` | Sim | `http://localhost:8080/api` | URL base da API, com `/api` e sem barra no final. Em produção, sempre HTTPS. Lida só no servidor. |
+| `API_URL` | Sim | `http://localhost:8080/api` | URL base da API, com `/api` e sem barra no final. Lida só no servidor. No Compose é `http://api:8080/api`. |
 
-Na imagem Docker, `NODE_ENV`, `HOSTNAME` e `PORT` já vêm definidos. Eles estão descritos no guia de deploy.
+Na imagem Docker, `NODE_ENV`, `HOSTNAME=0.0.0.0` e `PORT=3000` já vêm definidos.
 
-Nunca commite `.env.local` nem outros arquivos com segredos.
+## Fotos dos anúncios
 
-## Deploy
-
-Azure Container Apps, com imagem no GHCR. O workflow de deploy automático (`.github/workflows/deploy.yml`) está comentado no momento, então não há CI nem deploy a cada push na `main`. Configuração, health check (`/api/saude`) e rollback estão em [docs/deploy-azure.md](docs/deploy-azure.md).
-
-Produção: https://peca-web.thankfulglacier-8a723f55.canadacentral.azurecontainerapps.io
+O backend grava as fotos no disco e devolve `imagemUrl` como `/imagens/{pasta}/{arquivo}`. A rota `app/imagens/[pasta]/[arquivo]/route.ts` repassa o pedido para `GET /api/imagens/...` do backend, então o navegador nunca fala com a API e o `next/image` otimiza as fotos como imagens locais.

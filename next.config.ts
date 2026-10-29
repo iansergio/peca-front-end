@@ -13,8 +13,8 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
-    // Fotos das peças ficam no Storage do Supabase.
-    remotePatterns: [{ protocol: "https", hostname: "**.supabase.co" }],
+    // Fotos das peças: servidas pelo próprio front em /imagens (proxy para o backend).
+    localPatterns: [{ pathname: "/imagens/**", search: "" }],
   },
   turbopack: {
     rules: {
