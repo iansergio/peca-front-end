@@ -32,6 +32,7 @@
 - [x] Integração do botão "Comprar via WhatsApp" (gerando link dinâmico: `wa.me/NUMERO?text=MENSAGEM`).
 - [-] Refatoração da Landing Page: Hero Banner promocional.
 - [-] Refatoração da Landing Page: Sub-header (segunda barra de navegação) de categorias.
+- [-] Sub-header só com os atalhos Telas, Câmeras, Carcaças (com tampas traseiras e aros/chassis) e Placas.
 - [-] Refatoração da Landing Page: Grid atualizado dos cards de peças conforme o novo mockup.
 - [-] Header no padrão do DS (logo PEÇA, busca, "Explorar categorias", "Entrar" e "Anunciar peça").
 - [-] Página `/pecas` com busca e filtro por categoria (filtrados no frontend: a API só filtra por modelo/preço).

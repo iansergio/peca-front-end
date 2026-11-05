@@ -68,11 +68,9 @@ export type CategoriaRapida = {
 /** Atalhos do sub-header: as categorias mais procuradas, algumas agrupadas. */
 export const categoriasRapidas: CategoriaRapida[] = [
   { slug: "telas", nome: "Telas", valoresApi: ["Tela"] },
-  { slug: "baterias", nome: "Baterias", valoresApi: ["Bateria"] },
-  { slug: "peliculas", nome: "Películas", valoresApi: ["Película"] },
   { slug: "cameras", nome: "Câmeras", valoresApi: ["Câmera", "Lente de câmera"] },
+  { slug: "carcacas", nome: "Carcaças", valoresApi: ["Carcaça", "Tampa traseira", "Aro / Chassi"] },
   { slug: "placas", nome: "Placas", valoresApi: ["Placa principal", "Subplaca"] },
-  { slug: "acessorios", nome: "Acessórios", valoresApi: ["Acessório"] },
 ]
 
 /**
