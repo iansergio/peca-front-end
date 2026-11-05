@@ -40,3 +40,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# secrets and sensitive files (SDD baseline, see peca-backend/ai/conventions.md)
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.tfstate
+*.dump
+*.sqlite*
+*.har
+*.log
